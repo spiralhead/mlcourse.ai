@@ -125,3 +125,5 @@ home
 
 # solutions
 *_solution.ipynb
+mlcourse_ai_jupyter_book/_build/
+mlcourse_ai_jupyter_book/book/jupyter_english/
