@@ -12,7 +12,7 @@ Author: Mariya Mansurova, Analyst & developer in Yandex.Metrics team. Translated
 **Fill cells marked with "Your code here" and submit your answers to the questions through the [web form](https://docs.google.com/forms/d/1UYQ_WYSpsV3VSlZAzhSN_YXmyjV7YlTP8EYMg8M8SoM/edit).**
 
 
-```python
+```{code-cell} ipython3
 import os
 import warnings
 
@@ -43,7 +43,7 @@ def plotly_df(df, title=""):
 ## Data preparation
 
 
-```python
+```{code-cell} ipython3
 # for Jupyter-book, we copy data from GitHub, locally, to save Internet traffic,
 # you can specify the data/ folder from the root of your cloned 
 # https://github.com/Yorko/mlcourse.ai repo, to save Internet traffic
@@ -51,14 +51,14 @@ DATA_PATH = "https://raw.githubusercontent.com/Yorko/mlcourse.ai/master/data/"
 ```
 
 
-```python
+```{code-cell} ipython3
 df = pd.read_csv(DATA_PATH + "wiki_machine_learning.csv", sep=" ")
 df = df[df["count"] != 0]
 df.head()
 ```
 
 
-```python
+```{code-cell} ipython3
 df.shape
 ```
 
@@ -66,22 +66,22 @@ df.shape
 We will train at first 5 months and predict the number of trips for June.
 
 
-```python
+```{code-cell} ipython3
 df.date = pd.to_datetime(df.date)
 ```
 
 
-```python
+```{code-cell} ipython3
 plotly_df(df.set_index("date")[["count"]])
 ```
 
 
-```python
+```{code-cell} ipython3
 from fbprophet import Prophet
 ```
 
 
-```python
+```{code-cell} ipython3
 predictions = 30
 
 df = df[["date", "count"]]
@@ -97,14 +97,14 @@ df.tail()
 - 2744
 
 
-```python
+```{code-cell} ipython3
 # You code here
 ```
 
 Estimate the quality of the prediction with the last 30 points.
 
 
-```python
+```{code-cell} ipython3
 # You code here
 ```
 
@@ -125,7 +125,7 @@ Estimate the quality of the prediction with the last 30 points.
 ## Predicting with ARIMA
 
 
-```python
+```{code-cell} ipython3
 %matplotlib inline
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
@@ -142,7 +142,7 @@ plt.rcParams["figure.figsize"] = (15, 10)
 - Series is not stationary, p_value = 0.001
 
 
-```python
+```{code-cell} ipython3
 # You code here
 ```
 
@@ -154,6 +154,6 @@ plt.rcParams["figure.figsize"] = (15, 10)
 - D = 0, d = 0, Q = 0, q = 2, P = 3, p = 1
 
 
-```python
+```{code-cell} ipython3
 # You code here
 ```

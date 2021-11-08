@@ -65,7 +65,7 @@ You can see random forest as bagging of decision trees with the modification of 
 ## 2. Comparison with Decision Trees and Bagging
 
 
-```python
+```{code-cell} ipython3
 # Disable warnings in Anaconda
 import warnings
 
@@ -89,7 +89,7 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 ```
 
 
-```python
+```{code-cell} ipython3
 n_train = 150        
 n_test = 1000       
 noise = 0.1
@@ -151,7 +151,7 @@ As we can see from our graphs and the MSE values above, a random forest of 10 tr
 We can also look at the advantages of random forests and bagging in classification problems:
 
 
-```python
+```{code-cell} ipython3
 np.random.seed(42)
 X, y = make_circles(n_samples=500, factor=0.1, noise=0.35, random_state=42)
 X_train_circles, X_test_circles, y_train_circles, y_test_circles = \
@@ -244,7 +244,7 @@ In this example we will look at predicting customer churn. This is a classificat
 First, let's build a simple classifier which we will use as a baseline. For the sake of simplicity, we will use only numeric features.
 
 
-```python
+```{code-cell} ipython3
 import pandas as pd
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import (GridSearchCV, StratifiedKFold,
@@ -285,7 +285,7 @@ We have accuracy equal to 91.18%. Now, let's try to improve this result, and tak
 Let's start with the number of trees:
 
 
-```python
+```{code-cell} ipython3
 # Initialize the validation
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
@@ -315,7 +315,7 @@ print("Best CV accuracy is {:.2f}% with {} trees".format(max(test_acc.mean(axis=
 ```
 
 
-```python
+```{code-cell} ipython3
 plt.style.use('ggplot')
 
 fig, ax = plt.subplots(figsize=(8, 4))
@@ -338,7 +338,7 @@ The figures also show that we achieved 100% accuracy on the training set, which 
 We will start with the maximum depth of trees `max_depth` and fix the number of trees at 100:
 
 
-```python
+```{code-cell} ipython3
 # Create lists to save accuracy values on the training and test sets
 train_acc = []
 test_acc = []
@@ -381,7 +381,7 @@ Parameter `max_depth` copes well with the regularization of our model and it doe
 Another important parameter worth tuning is `min_samples_leaf`. It also contributes to regularization.
 
 
-```python
+```{code-cell} ipython3
 # Create lists to save accuracy values on the training and test sets
 train_acc = []
 test_acc = []
@@ -409,7 +409,7 @@ print("Best CV accuracy is {:.2f}% with {} min_samples_leaf".format(max(test_acc
 ```
 
 
-```python
+```{code-cell} ipython3
 fig, ax = plt.subplots(figsize=(8, 4))
 ax.plot(min_samples_leaf_grid, train_acc.mean(axis=1), alpha=0.5, color='blue', label='train')
 ax.plot(min_samples_leaf_grid, test_acc.mean(axis=1), alpha=0.5, color='red', label='cv')
@@ -428,7 +428,7 @@ In this case, we do not see an improvement in accuracy on the validation set, bu
 Let's consider the parameter `max_features`. For classification, the value $\large \sqrt{d}$ (the total number of features) is typically used as the default choice. Let's check whether it would be optimal to use 4 features in our case:
 
 
-```python
+```{code-cell} ipython3
 # Create lists to save accuracy values on the training and test sets
 train_acc = []
 test_acc = []
@@ -472,7 +472,7 @@ In our case, the optimal number of features is equal to 10. This is the value at
 We have seen how the learning curves change with different values of the basic parameters. Now, let's use `GridSearch` to find the optimal parameters for our example:
 
 
-```python
+```{code-cell} ipython3
 # Initialize the set of parameters for exhaustive search and fit 
 parameters = {'max_features': [4, 7, 10, 13], 
               'min_samples_leaf': [1, 3, 5, 7], 
@@ -483,7 +483,7 @@ gcv.fit(X, y)
 ```
 
 
-```python
+```{code-cell} ipython3
 gcv.best_params_, gcv.best_score_
 ```
 

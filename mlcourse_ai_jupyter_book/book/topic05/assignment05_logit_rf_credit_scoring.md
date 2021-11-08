@@ -45,7 +45,7 @@ Predict whether the customer will repay their credit within 90 days. This is a b
 Let's set up our environment:
 
 
-```python
+```{code-cell} ipython3
 # Disable warnings in Anaconda
 import warnings
 
@@ -62,7 +62,7 @@ sns.set()
 ```
 
 
-```python
+```{code-cell} ipython3
 from matplotlib import rcParams
 
 rcParams["figure.figsize"] = 11, 8
@@ -71,7 +71,7 @@ rcParams["figure.figsize"] = 11, 8
 Let's write the function that will replace *NaN* values with the median for each column.
 
 
-```python
+```{code-cell} ipython3
 def fill_nan(table):
     for col in table.columns:
         table[col] = table[col].fillna(table[col].median())
@@ -81,7 +81,7 @@ def fill_nan(table):
 Now, read the data:
 
 
-```python
+```{code-cell} ipython3
 # for Jupyter-book, we copy data from GitHub, locally, to save Internet traffic,
 # you can specify the data/ folder from the root of your cloned 
 # https://github.com/Yorko/mlcourse.ai repo, to save Internet traffic
@@ -89,7 +89,7 @@ DATA_PATH = "https://raw.githubusercontent.com/Yorko/mlcourse.ai/master/data/"
 ```
 
 
-```python
+```{code-cell} ipython3
 data = pd.read_csv(DATA_PATH + "credit_scoring_sample.csv", sep=";")
 data.head()
 ```
@@ -97,14 +97,14 @@ data.head()
 Look at the variable types:
 
 
-```python
+```{code-cell} ipython3
 data.dtypes
 ```
 
 Check the class balance:
 
 
-```python
+```{code-cell} ipython3
 ax = data["SeriousDlqin2yrs"].hist(orientation="horizontal", color="red")
 ax.set_xlabel("number_of_observations")
 ax.set_ylabel("unique_value")
@@ -117,7 +117,7 @@ data["SeriousDlqin2yrs"].value_counts() / data.shape[0]
 Separate the input variable names by excluding the target:
 
 
-```python
+```{code-cell} ipython3
 independent_columns_names = [x for x in data if x != "SeriousDlqin2yrs"]
 independent_columns_names
 ```
@@ -125,14 +125,14 @@ independent_columns_names
 Apply the function to replace *NaN* values:
 
 
-```python
+```{code-cell} ipython3
 table = fill_nan(data)
 ```
 
 Separate the target variable and input features:
 
 
-```python
+```{code-cell} ipython3
 X = table[independent_columns_names]
 y = table["SeriousDlqin2yrs"]
 ```
@@ -147,7 +147,7 @@ y = table["SeriousDlqin2yrs"]
 4. 52.56 – 52.88
 
 
-```python
+```{code-cell} ipython3
 # You code here (read-only in a JupyterBook, pls run jupyter-notebook to edit)
 ```
 
@@ -156,7 +156,7 @@ y = table["SeriousDlqin2yrs"]
 Let's set up to use logistic regression:
 
 
-```python
+```{code-cell} ipython3
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 ```
@@ -164,21 +164,21 @@ from sklearn.model_selection import GridSearchCV, StratifiedKFold
 Now, we will create a `LogisticRegression` model and use `class_weight='balanced'` to make up for our unbalanced classes.
 
 
-```python
+```{code-cell} ipython3
 lr = LogisticRegression(random_state=5, class_weight="balanced")
 ```
 
 Let's try to find the best regularization coefficient, which is the coefficient `C` for logistic regression. Then, we will have an optimal model that is not overfit and is a good predictor of the target variable.
 
 
-```python
+```{code-cell} ipython3
 parameters = {"C": (0.0001, 0.001, 0.01, 0.1, 1, 10)}
 ```
 
 In order to find the optimal value of `C`, let's apply stratified 5-fold validation and look at the *ROC AUC* against different values of the parameter `C`. Use the `StratifiedKFold` function for this: 
 
 
-```python
+```{code-cell} ipython3
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=5)
 ```
 
@@ -194,7 +194,7 @@ One of the important metrics of model quality is the *Area Under the Curve (AUC)
 6. 10
 
 
-```python
+```{code-cell} ipython3
 # You code here (read-only in a JupyterBook, pls run jupyter-notebook to edit)
 ```
 
@@ -204,7 +204,7 @@ One of the important metrics of model quality is the *Area Under the Curve (AUC)
 2. No
 
 
-```python
+```{code-cell} ipython3
 # You code here (read-only in a JupyterBook, pls run jupyter-notebook to edit)
 ```
 
@@ -221,7 +221,7 @@ One of the important metrics of model quality is the *Area Under the Curve (AUC)
 7. NumberOfDependents
 
 
-```python
+```{code-cell} ipython3
 # You code here (read-only in a JupyterBook, pls run jupyter-notebook to edit)
 ```
 
@@ -233,7 +233,7 @@ One of the important metrics of model quality is the *Area Under the Curve (AUC)
 4. 0.24
 
 
-```python
+```{code-cell} ipython3
 # You code here (read-only in a JupyterBook, pls run jupyter-notebook to edit)
 ```
 
@@ -245,7 +245,7 @@ One of the important metrics of model quality is the *Area Under the Curve (AUC)
 4. 0.66
 
 
-```python
+```{code-cell} ipython3
 # You code here (read-only in a JupyterBook, pls run jupyter-notebook to edit)
 ```
 
@@ -254,14 +254,14 @@ One of the important metrics of model quality is the *Area Under the Curve (AUC)
 Import the Random Forest classifier:
 
 
-```python
+```{code-cell} ipython3
 from sklearn.ensemble import RandomForestClassifier
 ```
 
 Initialize Random Forest with 100 trees and balance target classes:
 
 
-```python
+```{code-cell} ipython3
 rf = RandomForestClassifier(
     n_estimators=100, n_jobs=-1, random_state=42, class_weight="balanced"
 )
@@ -270,7 +270,7 @@ rf = RandomForestClassifier(
 We will search for the best parameters among the following values:
 
 
-```python
+```{code-cell} ipython3
 parameters = {
     "max_features": [1, 2, 4],
     "min_samples_leaf": [3, 5, 7, 9],
@@ -288,7 +288,7 @@ Also, we will use the stratified k-fold validation again. You should still have 
 4. 1%
 
 
-```python
+```{code-cell} ipython3
 # You code here (read-only in a JupyterBook, pls run jupyter-notebook to edit)
 ```
 
@@ -303,7 +303,7 @@ Also, we will use the stratified k-fold validation again. You should still have 
 7. NumberOfDependents
 
 
-```python
+```{code-cell} ipython3
 # You code here (read-only in a JupyterBook, pls run jupyter-notebook to edit)
 ```
 
@@ -319,7 +319,7 @@ Also, we will use the stratified k-fold validation again. You should still have 
 Import modules and set up the parameters for bagging:
 
 
-```python
+```{code-cell} ipython3
 from sklearn.ensemble import BaggingClassifier
 from sklearn.model_selection import RandomizedSearchCV, cross_val_score
 
@@ -338,7 +338,7 @@ parameters = {
 4. 76.50%
 
 
-```python
+```{code-cell} ipython3
 # You code here (read-only in a JupyterBook, pls run jupyter-notebook to edit)
 ```
 

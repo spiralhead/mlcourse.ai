@@ -18,7 +18,7 @@ First, we pretend that the type of activity is unknown to us, and we will try to
 Fill the code where needed ("Your code is here") and answer the questions in the [web form](https://docs.google.com/forms/d/1wBf5UoRndv6PpzIwYnM9f0ysoGa4Yqcqle-HBlBP5QQ/edit).
 
 
-```python
+```{code-cell} ipython3
 import os
 
 import numpy as np
@@ -44,7 +44,7 @@ RANDOM_STATE = 17
 ```
 
 
-```python
+```{code-cell} ipython3
 # for Jupyter-book, we copy data from GitHub, locally, to save Internet traffic,
 # you can specify the data/ folder from the root of your cloned 
 # https://github.com/Yorko/mlcourse.ai repo, to save Internet traffic
@@ -52,12 +52,12 @@ DATA_PATH = "https://raw.githubusercontent.com/Yorko/mlcourse.ai/master/data/"
 ```
 
 
-```python
+```{code-cell} ipython3
 PATH_TO_SAMSUNG_DATA = DATA_PATH + "samsung_HAR/"
 ```
 
 
-```python
+```{code-cell} ipython3
 X_train = np.loadtxt(os.path.join(PATH_TO_SAMSUNG_DATA, "samsung_train.txt"))
 y_train = np.loadtxt(
     os.path.join(PATH_TO_SAMSUNG_DATA, "samsung_train_labels.txt")
@@ -70,7 +70,7 @@ y_test = np.loadtxt(
 ```
 
 
-```python
+```{code-cell} ipython3
 # Checking dimensions
 assert X_train.shape == (7352, 561) and y_train.shape == (7352,)
 assert X_test.shape == (2947, 561) and y_test.shape == (2947,)
@@ -79,7 +79,7 @@ assert X_test.shape == (2947, 561) and y_test.shape == (2947,)
 For clustering, we do not need a target vector, so we'll work with the combination of training and test samples. Merge `X_train` with `X_test`, and `y_train` with `y_test`.
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 X = np.vstack([X_train, X_test])
 y = np.hstack([y_train, y_test])
@@ -88,12 +88,12 @@ y = np.hstack([y_train, y_test])
 Define the number of unique values of the labels of the target class.
 
 
-```python
+```{code-cell} ipython3
 np.unique(y)
 ```
 
 
-```python
+```{code-cell} ipython3
 n_classes = np.unique(y).size
 ```
 
@@ -108,7 +108,7 @@ n_classes = np.unique(y).size
 Scale the sample using `StandardScaler` with default parameters.
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
@@ -117,7 +117,7 @@ X_scaled = scaler.fit_transform(X)
 Reduce the number of dimensions using PCA, leaving as many components as necessary to explain at least 90% of the variance of the original (scaled) data. Use the scaled dataset and fix `random_state` (RANDOM_STATE constant).
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 pca = PCA(n_components=0.9, random_state=RANDOM_STATE).fit(X_scaled)
 X_pca = pca.transform(X_scaled)
@@ -127,7 +127,7 @@ X_pca = pca.transform(X_scaled)
 What is the minimum number of principal components required to cover the 90% of the variance of the original (scaled) data?
 
 
-```python
+```{code-cell} ipython3
 # В Your code here
 X_pca.shape
 ```
@@ -148,7 +148,7 @@ What percentage of the variance is covered by the first principal component? Rou
 - 61
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 round(float(pca.explained_variance_ratio_[0] * 100))
 ```
@@ -156,7 +156,7 @@ round(float(pca.explained_variance_ratio_[0] * 100))
 Visualize data in projection on the first two principal components.
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 plt.scatter(X_pca[:, 0], X_pca[:, 1], c=y, s=20, cmap="viridis");
 ```
@@ -183,7 +183,7 @@ Options:
 Other parameters should have default values.
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 kmeans = KMeans(n_clusters=n_classes, n_init=100, random_state=RANDOM_STATE, n_jobs=1)
 kmeans.fit(X_pca)
@@ -193,7 +193,7 @@ cluster_labels = kmeans.labels_
 Visualize data in projection on the first two principal components. Color the dots according to the clusters obtained.
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 plt.scatter(X_pca[:, 0], X_pca[:, 1], c=cluster_labels, s=20, cmap="viridis");
 ```
@@ -201,7 +201,7 @@ plt.scatter(X_pca[:, 0], X_pca[:, 1], c=cluster_labels, s=20, cmap="viridis");
 Look at the correspondence between the cluster marks and the original class labels and what kinds of activities the `KMeans` algorithm is confused at.
 
 
-```python
+```{code-cell} ipython3
 tab = pd.crosstab(y, cluster_labels, margins=True)
 tab.index = [
     "walking",
@@ -236,7 +236,7 @@ Which activity is separated from the rest better than others based on the simple
 - all three options are incorrect** [+] **
 
 
-```python
+```{code-cell} ipython3
 pd.Series(
     tab.iloc[:-1, :-1].max(axis=1).values / tab.iloc[:-1, -1].values,
     index=tab.index[:-1],
@@ -246,7 +246,7 @@ pd.Series(
 It can be seen that kMeans does not distinguish activities very well. Use the elbow method to select the optimal number of clusters. Parameters of the algorithm and the data we use are the same as before, we change only `n_clusters`.
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 inertia = []
 for k in tqdm_notebook(range(1, n_classes + 1)):
@@ -257,14 +257,14 @@ for k in tqdm_notebook(range(1, n_classes + 1)):
 ```
 
 
-```python
+```{code-cell} ipython3
 plt.plot(range(1, 7), inertia, marker="s");
 ```
 
 We calculate $ D(k) $, as described in [this](https://medium.com/open-machine-learning-course/open-machine-learning-course-topic-7-unsupervised-learning-pca-and-clustering-db7879568417) article in the section "Choosing the number of clusters for K-means".
 
 
-```python
+```{code-cell} ipython3
 d = {}
 for k in range(2, 6):
     i = k - 1
@@ -272,7 +272,7 @@ for k in range(2, 6):
 ```
 
 
-```python
+```{code-cell} ipython3
 d
 ```
 
@@ -290,14 +290,14 @@ How many clusters can we choose according to the elbow method? <br>
 Let's try another clustering algorithm, described in the article – agglomerative clustering.
 
 
-```python
+```{code-cell} ipython3
 ag = AgglomerativeClustering(n_clusters=n_classes, linkage="ward").fit(X_pca)
 ```
 
 Calculate the Adjusted Rand Index (`sklearn.metrics`) for the resulting clustering and for ` KMeans` with the parameters from the 4th question.
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 print("KMeans: ARI =", metrics.adjusted_rand_score(y, cluster_labels))
 print("Agglomerative CLustering: ARI =", metrics.adjusted_rand_score(y, ag.labels_))
@@ -328,7 +328,7 @@ Choose the `C` hyperparameter for` LinearSVC` using `GridSearchCV`.
 - In `GridSearchCV`, specify `cv` = 3.
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
@@ -336,13 +336,13 @@ X_test_scaled = scaler.transform(X_test)
 ```
 
 
-```python
+```{code-cell} ipython3
 svc = LinearSVC(random_state=RANDOM_STATE)
 svc_params = {"C": [0.001, 0.01, 0.1, 1, 10]}
 ```
 
 
-```python
+```{code-cell} ipython3
 %%time
 # Your code here
 best_svc = GridSearchCV(svc, svc_params, n_jobs=1, cv=3, verbose=1)
@@ -350,7 +350,7 @@ best_svc.fit(X_train_scaled, y_train);
 ```
 
 
-```python
+```{code-cell} ipython3
 best_svc.best_params_, best_svc.best_score_
 ```
 
@@ -365,12 +365,12 @@ Which value of the hyperparameter `C` was chosen the best on the basis of cross-
 - 10
 
 
-```python
+```{code-cell} ipython3
 y_predicted = best_svc.predict(X_test_scaled)
 ```
 
 
-```python
+```{code-cell} ipython3
 tab = pd.crosstab(y_test, y_predicted, margins=True)
 tab.index = [
     "walking",
@@ -424,7 +424,7 @@ What is the difference between the best quality (accuracy) for cross-validation 
 - 20%
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
@@ -436,27 +436,27 @@ X_test_pca = pca.transform(X_test_scaled)
 ```
 
 
-```python
+```{code-cell} ipython3
 svc = LinearSVC(random_state=RANDOM_STATE)
 svc_params = {"C": [0.001, 0.01, 0.1, 1, 10]}
 ```
 
 
-```python
+```{code-cell} ipython3
 %%time
 best_svc_pca = GridSearchCV(svc, svc_params, n_jobs=1, cv=3, verbose=1)
 best_svc_pca.fit(X_train_pca, y_train);
 ```
 
 
-```python
+```{code-cell} ipython3
 best_svc_pca.best_params_, best_svc_pca.best_score_
 ```
 
 The result with PCA is worse by 4%, comparing accuracy on cross-validation.
 
 
-```python
+```{code-cell} ipython3
 round(100 * (best_svc_pca.best_score_ - best_svc.best_score_))
 ```
 

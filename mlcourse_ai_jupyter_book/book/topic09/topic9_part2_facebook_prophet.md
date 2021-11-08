@@ -149,7 +149,7 @@ In R you can find the corresponing CRAN package. Refer to the [documentation](ht
 Let's import the modules that we will need, and initialize our environment:
 
 
-```python
+```{code-cell} ipython3
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -170,7 +170,7 @@ We will predict the daily number of posts published on [Medium](https://medium.c
 First, we load our dataset.
 
 
-```python
+```{code-cell} ipython3
 # for Jupyter-book, we copy data from GitHub, locally, to save Internet traffic,
 # you can specify the data/ folder from the root of your cloned 
 # https://github.com/Yorko/mlcourse.ai repo, to save Internet traffic
@@ -178,35 +178,35 @@ DATA_PATH = "https://raw.githubusercontent.com/Yorko/mlcourse.ai/master/data/"
 ```
 
 
-```python
+```{code-cell} ipython3
 df = pd.read_csv(DATA_PATH + "medium_posts.csv.zip", sep="\t")
 ```
 
 Next, we leave out all columns except `published` and `url`. The former corresonds to the time dimension while the latter uniquely identifies a post by its URL. Along the way we get rid of possible duplicates and missing values in the data:
 
 
-```python
+```{code-cell} ipython3
 df = df[["published", "url"]].dropna().drop_duplicates()
 ```
 
 Next, we need to convert `published` to the datetime format because by default `pandas` treats this field as string-valued.
 
 
-```python
+```{code-cell} ipython3
 df["published"] = pd.to_datetime(df["published"])
 ```
 
 Let's sort the dataframe by time and take a look at what we've got:
 
 
-```python
+```{code-cell} ipython3
 df.sort_values(by=["published"]).head(n=3)
 ```
 
 Medium's public release date was August 15, 2012. But, as you can see from the data above, there are at least several rows with much earlier publication dates. They have somehow turned up in our dataset, but they are hardly legitimate ones. We will just trim our time series to keep only those rows that fall onto the period from August 15, 2012 to June 25, 2017:
 
 
-```python
+```{code-cell} ipython3
 df = df[
     (df["published"] > "2012-08-15") & (df["published"] < "2017-06-26")
 ].sort_values(by=["published"])
@@ -214,14 +214,14 @@ df.head(n=3)
 ```
 
 
-```python
+```{code-cell} ipython3
 df.tail(n=3)
 ```
 
 As we are going to predict the number of published posts, we will aggregate and count unique posts at each given point in time. We will name the corresponding new column `posts`:
 
 
-```python
+```{code-cell} ipython3
 aggr_df = df.groupby("published")[["url"]].count()
 aggr_df.columns = ["posts"]
 ```
@@ -229,7 +229,7 @@ aggr_df.columns = ["posts"]
 In this practice, we are interested in the number of posts **a day**. But at this moment all our data is divided into irregular time intervals that are less than a day. This is called a *sub-daily time series*. To see it, let's print out the first 3 rows:
 
 
-```python
+```{code-cell} ipython3
 aggr_df.head(n=3)
 ```
 
@@ -238,7 +238,7 @@ To fix this, we need to aggregate the post counts by "bins" of a date size. In t
 Luckily, `pandas` has a built-in functionality for this task. We will resample our time index down to 1-day bins:
 
 
-```python
+```{code-cell} ipython3
 daily_df = aggr_df.resample("D").apply(sum)
 daily_df.head(n=3)
 ```
@@ -252,7 +252,7 @@ We will create a time series plot for the whole time range. Displaying data over
 First, we import and initialize the `Plotly` library, which allows creating beautiful interactive plots:
 
 
-```python
+```{code-cell} ipython3
 from plotly import graph_objs as go
 from plotly.offline import init_notebook_mode, iplot
 
@@ -263,7 +263,7 @@ init_notebook_mode(connected=True)
 We also define a helper function, which will plot our dataframes throughout the article:
 
 
-```python
+```{code-cell} ipython3
 def plotly_df(df, title=""):
     """Visualize all the dataframe columns as line plots."""
     common_kw = dict(x=df.index, mode="lines")
@@ -276,7 +276,7 @@ def plotly_df(df, title=""):
 Let's try and plot our dataset *as is*:
 
 
-```python
+```{code-cell} ipython3
 plotly_df(daily_df, title="Posts on Medium (daily)")
 ```
 
@@ -287,14 +287,14 @@ To reduce the noise, we will resample the post counts down to weekly bins. Besid
 We save our downsampled dataframe in a separate variable because further in this practice we will work only with daily series:
 
 
-```python
+```{code-cell} ipython3
 weekly_df = daily_df.resample("W").apply(sum)
 ```
 
 Finally, we plot the result:
 
 
-```python
+```{code-cell} ipython3
 plotly_df(weekly_df, title="Posts on Medium (weekly)")
 ```
 
@@ -307,7 +307,7 @@ For example, zooming-in on a couple of consecutive years shows us time points co
 Now, we're going to omit the first few years of observations, up to 2015. First, they won't contribute much into the forecast quality in 2017. Second, these first years, having very low number of posts per day, are likely to increase noise in our predictions, as the model would be forced to fit this abnormal historical data along with more relevant and indicative data from the recent years.
 
 
-```python
+```{code-cell} ipython3
 daily_df = daily_df.loc[daily_df.index >= "2015-01-01"]
 daily_df.head(n=3)
 ```
@@ -323,7 +323,7 @@ Prophet's API is very similar to the one you can find in `sklearn`. First we cre
 To get started, we'll import the library and mute unimportant diagnostic messages:
 
 
-```python
+```{code-cell} ipython3
 import logging
 
 from fbprophet import Prophet
@@ -334,7 +334,7 @@ logging.getLogger().setLevel(logging.ERROR)
 Let's convert our dataframe to the format required by Prophet:
 
 
-```python
+```{code-cell} ipython3
 df = daily_df.reset_index()
 df.columns = ["ds", "y"]
 # converting timezones (issue https://github.com/facebook/prophet/issues/831)
@@ -347,7 +347,7 @@ The authors of the library generally advise to make predictions based on at leas
 To measure the quality of our forecast, we need to split our dataset into the *historical part*, which is the first and biggest slice of our data, and the *prediction part*, which will be located at the end of the timeline. We will remove the last month from the dataset in order to use it later as a prediction target:
 
 
-```python
+```{code-cell} ipython3
 prediction_size = 30
 train_df = df[:-prediction_size]
 train_df.tail(n=3)
@@ -356,7 +356,7 @@ train_df.tail(n=3)
 Now we need to create a new `Prophet` object. Here we can pass the parameters of the model into the constructor. But in this article we will use the defaults. Then we train our model by invoking its `fit` method on our training dataset:
 
 
-```python
+```{code-cell} ipython3
 m = Prophet()
 m.fit(train_df);
 ```
@@ -364,7 +364,7 @@ m.fit(train_df);
 Using the helper method `Prophet.make_future_dataframe`, we create a dataframe which will contain all dates from the history and also extend into the future for those 30 days that we left out before.
 
 
-```python
+```{code-cell} ipython3
 future = m.make_future_dataframe(periods=prediction_size)
 future.tail(n=3)
 ```
@@ -372,7 +372,7 @@ future.tail(n=3)
 We predict values with `Prophet` by passing in the dates for which we want to create a forecast. If we also supply the historical dates (as in our case), then in addition to the prediction we will get an in-sample fit for the history. Let's call the model's `predict` method with our `future` dataframe as an input:
 
 
-```python
+```{code-cell} ipython3
 forecast = m.predict(future)
 forecast.tail(n=3)
 ```
@@ -384,7 +384,7 @@ The Prophet library has its own built-in tools for visualization that enable us 
 First, there is a method called `Prophet.plot` that plots all the points from the forecast:
 
 
-```python
+```{code-cell} ipython3
 m.plot(forecast);
 ```
 
@@ -395,7 +395,7 @@ The second function `Prophet.plot_components` might be much more useful in our c
 Let's try it out:
 
 
-```python
+```{code-cell} ipython3
 m.plot_components(forecast);
 ```
 
@@ -408,14 +408,14 @@ Let's evaluate the quality of the algorithm by calculating the error metrics for
 Let's look into the object `forecast` that the library created for us:
 
 
-```python
+```{code-cell} ipython3
 print(", ".join(forecast.columns))
 ```
 
 We can see that this dataframe contains all the information we need except for the historical values. We need to join the `forecast` object with the actual values `y` from the original dataset `df`. For this we will define a helper function that we will reuse later:
 
 
-```python
+```{code-cell} ipython3
 def make_comparison_dataframe(historical, forecast):
     """Join the history with the forecast.
     
@@ -429,7 +429,7 @@ def make_comparison_dataframe(historical, forecast):
 Let's apply this function to our last forecast:
 
 
-```python
+```{code-cell} ipython3
 cmp_df = make_comparison_dataframe(df, forecast)
 cmp_df.tail(n=3)
 ```
@@ -437,7 +437,7 @@ cmp_df.tail(n=3)
 We are also going to define a helper function that we will use to gauge the quality of our forecasting with MAPE and MAE error measures:
 
 
-```python
+```{code-cell} ipython3
 def calculate_forecast_errors(df, prediction_size):
     """Calculate MAPE and MAE of the forecast.
     
@@ -469,7 +469,7 @@ def calculate_forecast_errors(df, prediction_size):
 Let's use our function:
 
 
-```python
+```{code-cell} ipython3
 for err_name, err_value in calculate_forecast_errors(cmp_df, prediction_size).items():
     print(err_name, err_value)
 ```
@@ -487,7 +487,7 @@ Third, we will use `Plotly` to make our chart interactive, which is great for ex
 We will define a custom helper function `show_forecast` and call it (for more on how it works please refer to the comments in the code and the [documentation](https://plot.ly/python/)):
 
 
-```python
+```{code-cell} ipython3
 def show_forecast(cmp_df, num_predictions, num_values, title):
     """Visualize the forecast."""
 
@@ -562,7 +562,7 @@ $$
 The corresponding function in Python is implemented as follows:
 
 
-```python
+```{code-cell} ipython3
 def inverse_boxcox(y, lambda_):
     return np.exp(y) if lambda_ == 0 else np.exp(np.log(lambda_ * y + 1) / lambda_)
 ```
@@ -570,14 +570,14 @@ def inverse_boxcox(y, lambda_):
 First, we prepare our dataset by setting its index:
 
 
-```python
+```{code-cell} ipython3
 train_df2 = train_df.copy().set_index("ds")
 ```
 
 Then, we apply the function `stats.boxcox` from `Scipy`, which applies the Box–Cox transformation. In our case it will return two values. The first one is the transformed series and the second one is the found value of $\lambda$ that is optimal in terms of the maximum log-likelihood:
 
 
-```python
+```{code-cell} ipython3
 train_df2["y"], lambda_prophet = stats.boxcox(train_df2["y"])
 train_df2.reset_index(inplace=True)
 ```
@@ -585,7 +585,7 @@ train_df2.reset_index(inplace=True)
 We create a new `Prophet` model and repeat the fit-predict cycle that we have already done above:
 
 
-```python
+```{code-cell} ipython3
 m2 = Prophet()
 m2.fit(train_df2)
 future2 = m2.make_future_dataframe(periods=prediction_size)
@@ -595,7 +595,7 @@ forecast2 = m2.predict(future2)
 At this point, we need to revert the Box–Cox transformation with our inverse function and the known value of $\lambda$:
 
 
-```python
+```{code-cell} ipython3
 for column in ["yhat", "yhat_lower", "yhat_upper"]:
     forecast2[column] = inverse_boxcox(forecast2[column], lambda_prophet)
 ```
@@ -603,7 +603,7 @@ for column in ["yhat", "yhat_lower", "yhat_upper"]:
 Here we will reuse our tools for making the comparison dataframe and calculating the errors:
 
 
-```python
+```{code-cell} ipython3
 cmp_df2 = make_comparison_dataframe(df, forecast2)
 for err_name, err_value in calculate_forecast_errors(cmp_df2, prediction_size).items():
     print(err_name, err_value)
@@ -614,7 +614,7 @@ So, we can definitely state an increase in the quality of the model.
 Finally, let's plot our previous performance with the latest results side-by-side. Note that we use `prediction_size` for the third parameter in order to zoom in on the interval being predicted:
 
 
-```python
+```{code-cell} ipython3
 show_forecast(cmp_df, prediction_size, 100, "No transformations")
 show_forecast(cmp_df2, prediction_size, 100, "Box–Cox transformation")
 ```

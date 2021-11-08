@@ -18,7 +18,7 @@ First, we pretend that the type of activity is unknown to us, and we will try to
 Fill the code where needed ("Your code is here") and answer the questions in the [web form](https://docs.google.com/forms/d/1wBf5UoRndv6PpzIwYnM9f0ysoGa4Yqcqle-HBlBP5QQ/edit).
 
 
-```python
+```{code-cell} ipython3
 import os
 
 import numpy as np
@@ -44,7 +44,7 @@ RANDOM_STATE = 17
 ```
 
 
-```python
+```{code-cell} ipython3
 # for Jupyter-book, we copy data from GitHub, locally, to save Internet traffic,
 # you can specify the data/ folder from the root of your cloned 
 # https://github.com/Yorko/mlcourse.ai repo, to save Internet traffic
@@ -52,12 +52,12 @@ DATA_PATH = "https://raw.githubusercontent.com/Yorko/mlcourse.ai/master/data/"
 ```
 
 
-```python
+```{code-cell} ipython3
 PATH_TO_SAMSUNG_DATA = DATA_PATH + "samsung_HAR/"
 ```
 
 
-```python
+```{code-cell} ipython3
 X_train = np.loadtxt(os.path.join(PATH_TO_SAMSUNG_DATA, "samsung_train.txt"))
 y_train = np.loadtxt(
     os.path.join(PATH_TO_SAMSUNG_DATA, "samsung_train_labels.txt")
@@ -70,7 +70,7 @@ y_test = np.loadtxt(
 ```
 
 
-```python
+```{code-cell} ipython3
 # Checking dimensions
 assert X_train.shape == (7352, 561) and y_train.shape == (7352,)
 assert X_test.shape == (2947, 561) and y_test.shape == (2947,)
@@ -79,19 +79,19 @@ assert X_test.shape == (2947, 561) and y_test.shape == (2947,)
 For clustering, we do not need a target vector, so we'll work with the combination of training and test samples. Merge `X_train` with `X_test`, and `y_train` with `y_test`.
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 ```
 
 Define the number of unique values of the labels of the target class.
 
 
-```python
+```{code-cell} ipython3
 # np.unique(y)
 ```
 
 
-```python
+```{code-cell} ipython3
 # n_classes = np.unique(y).size
 ```
 
@@ -106,14 +106,14 @@ Define the number of unique values of the labels of the target class.
 Scale the sample using `StandardScaler` with default parameters.
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 ```
 
 Reduce the number of dimensions using PCA, leaving as many components as necessary to explain at least 90% of the variance of the original (scaled) data. Use the scaled dataset and fix `random_state` (RANDOM_STATE constant).
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 # pca =
 # X_pca =
@@ -123,7 +123,7 @@ Reduce the number of dimensions using PCA, leaving as many components as necessa
 What is the minimum number of principal components required to cover the 90% of the variance of the original (scaled) data?
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 ```
 
@@ -143,14 +143,14 @@ What percentage of the variance is covered by the first principal component? Rou
 - 61
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 ```
 
 Visualize data in projection on the first two principal components.
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 # plt.scatter(, , c=y, s=20, cmap='viridis');
 ```
@@ -177,14 +177,14 @@ Options:
 Other parameters should have default values.
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 ```
 
 Visualize data in projection on the first two principal components. Color the dots according to the clusters obtained.
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 # plt.scatter(, , c=cluster_labels, s=20, cmap='viridis');
 ```
@@ -192,7 +192,7 @@ Visualize data in projection on the first two principal components. Color the do
 Look at the correspondence between the cluster marks and the original class labels and what kinds of activities the `KMeans` algorithm is confused at.
 
 
-```python
+```{code-cell} ipython3
 # tab = pd.crosstab(y, cluster_labels, margins=True)
 # tab.index = ['walking', 'going up the stairs',
 #             'going down the stairs', 'sitting', 'standing', 'laying', 'all']
@@ -222,7 +222,7 @@ Which activity is separated from the rest better than others based on the simple
 It can be seen that kMeans does not distinguish activities very well. Use the elbow method to select the optimal number of clusters. Parameters of the algorithm and the data we use are the same as before, we change only `n_clusters`.
 
 
-```python
+```{code-cell} ipython3
 # # Your code here
 # inertia = []
 # for k in tqdm_notebook(range(1, n_classes + 1)):
@@ -243,7 +243,7 @@ How many clusters can we choose according to the elbow method? <br>
 Let's try another clustering algorithm, described in the article – agglomerative clustering.
 
 
-```python
+```{code-cell} ipython3
 # ag = AgglomerativeClustering(n_clusters=n_classes,
 #                              linkage='ward').fit(X_pca)
 ```
@@ -251,7 +251,7 @@ Let's try another clustering algorithm, described in the article – agglomerati
 Calculate the Adjusted Rand Index (`sklearn.metrics`) for the resulting clustering and for ` KMeans` with the parameters from the 4th question.
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 ```
 
@@ -275,7 +275,7 @@ Choose the `C` hyperparameter for` LinearSVC` using `GridSearchCV`.
 - In `GridSearchCV`, specify `cv` = 3.
 
 
-```python
+```{code-cell} ipython3
 # # Your code here
 # scaler = StandardScaler()
 # X_train_scaled =
@@ -283,20 +283,20 @@ Choose the `C` hyperparameter for` LinearSVC` using `GridSearchCV`.
 ```
 
 
-```python
+```{code-cell} ipython3
 svc = LinearSVC(random_state=RANDOM_STATE)
 svc_params = {"C": [0.001, 0.01, 0.1, 1, 10]}
 ```
 
 
-```python
+```{code-cell} ipython3
 # %%time
 # # Your code here
 # best_svc = None
 ```
 
 
-```python
+```{code-cell} ipython3
 # best_svc.best_params_, best_svc.best_score_
 ```
 
@@ -311,12 +311,12 @@ Which value of the hyperparameter `C` was chosen the best on the basis of cross-
 - 10
 
 
-```python
+```{code-cell} ipython3
 # y_predicted = best_svc.predict(X_test_scaled)
 ```
 
 
-```python
+```{code-cell} ipython3
 # tab = pd.crosstab(y_test, y_predicted, margins=True)
 # tab.index = ['walking', 'climbing up the stairs',
 #              'going down the stairs', 'sitting', 'standing', 'laying', 'all']
@@ -351,7 +351,7 @@ What is the difference between the best quality (accuracy) for cross-validation 
 - 20%
 
 
-```python
+```{code-cell} ipython3
 # Your code here
 ```
 

@@ -1,18 +1,34 @@
+---
+jupytext:
+  formats: md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python3
+---
+
+(topic4_part3)=
+
+
+# Topic 4. Linear Classification and Regression
+## Part 3. An Illustrative Example of Logistic Regression Regularization
+
+
 <img src="https://habrastorage.org/webt/ia/m9/zk/iam9zkyzqebnf_okxipihkgjwnw.jpeg" />
     
 **<center>[mlcourse.ai](https://mlcourse.ai) – Open Machine Learning Course** </center><br>
 
 Author: [Yury Kashnitsky](https://yorko.github.io). Translated and edited by [Christina Butsko](https://www.linkedin.com/in/christinabutsko/), [Nerses Bagiyan](https://www.linkedin.com/in/nersesbagiyan/), [Yulia Klimushina](https://www.linkedin.com/in/yuliya-klimushina-7168a9139), and [Yuanyuan Pao](https://www.linkedin.com/in/yuanyuanpao/). This material is subject to the terms and conditions of the [Creative Commons CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) license. Free use is permitted for any non-commercial purpose.
 
-# <center>Topic 4. Linear Classification and Regression
-## <center> Part 3. An Illustrative Example of Logistic Regression Regularization
-
 In the first article, we demonstrated how polynomial features allow linear models to build nonlinear separating surfaces. Let's now show this visually.
 
 Let's see how regularization affects the quality of classification on a dataset on microchip testing from Andrew Ng's course on machine learning. We will use logistic regression with polynomial features and vary the regularization parameter $C$. First, we will see how regularization affects the separating border of the classifier and intuitively recognize under- and overfitting. Then, we will choose the regularization parameter to be numerically close to the optimal value via (`cross-validation`) and (`GridSearch`).
 
 
-```python
+```{code-cell} ipython3
 # we don't like warnings
 # you can comment the following 2 lines if you'd like to
 import warnings
@@ -33,7 +49,7 @@ from sklearn.preprocessing import PolynomialFeatures
 Let's load the data using `read_csv` from the `pandas` library. In this dataset on 118 microchips (objects), there are results for two tests of quality control (two numerical variables) and information whether the microchip went into production. Variables are already centered, meaning that the column values have had their own mean values subtracted. Thus, the "average" microchip corresponds to a zero value in the test results.  
 
 
-```python
+```{code-cell} ipython3
 # for Jupyter-book, we copy data from GitHub, locally, to save Internet traffic,
 # you can specify the data/ folder from the root of your cloned 
 # https://github.com/Yorko/mlcourse.ai repo, to save Internet traffic
@@ -41,7 +57,7 @@ DATA_PATH = "https://raw.githubusercontent.com/Yorko/mlcourse.ai/master/data/"
 ```
 
 
-```python
+```{code-cell} ipython3
 # loading data
 data = pd.read_csv(
     DATA_PATH + "microchip_tests.txt", 
@@ -55,19 +71,19 @@ data.info()
 Let's inspect at the first and last 5 lines.
 
 
-```python
+```{code-cell} ipython3
 data.head(5)
 ```
 
 
-```python
+```{code-cell} ipython3
 data.tail(5)
 ```
 
 Now we should save the training set and the target class labels in separate NumPy arrays.
 
 
-```python
+```{code-cell} ipython3
 X = data.iloc[:, :2].values
 y = data.iloc[:, 2].values
 ```
@@ -75,7 +91,7 @@ y = data.iloc[:, 2].values
 As an intermediate step, we can plot the data. Orange points correspond to defective chips, blue to normal ones.
 
 
-```python
+```{code-cell} ipython3
 plt.scatter(X[y == 1, 0], X[y == 1, 1], c="blue", label="Released")
 plt.scatter(X[y == 0, 0], X[y == 0, 1], c="orange", label="Faulty")
 plt.xlabel("Test 1")
@@ -87,7 +103,7 @@ plt.legend();
 Let's define a function to display the separating curve of the classifier.
 
 
-```python
+```{code-cell} ipython3
 def plot_boundary(clf, X, y, grid_step=0.01, poly_featurizer=None):
     x_min, x_max = X[:, 0].min() - 0.1, X[:, 0].max() + 0.1
     y_min, y_max = X[:, 1].min() - 0.1, X[:, 1].max() + 0.1
@@ -117,20 +133,20 @@ The number of such features is exponentially large, and it can be costly to buil
 We will use `sklearn`'s implementation of logistic regression. So, we create an object that will add polynomial features up to degree 7 to matrix $X$.
 
 
-```python
+```{code-cell} ipython3
 poly = PolynomialFeatures(degree=7)
 X_poly = poly.fit_transform(X)
 ```
 
 
-```python
+```{code-cell} ipython3
 X_poly.shape
 ```
 
 Let's train logistic regression with regularization parameter $C = 10^{-2}$.
 
 
-```python
+```{code-cell} ipython3
 C = 1e-2
 logit = LogisticRegression(C=C, random_state=17)
 logit.fit(X_poly, y)
@@ -150,7 +166,7 @@ print("Accuracy on training set:", round(logit.score(X_poly, y), 3))
 We could now try increasing $C$ to 1. In doing this, we weaken regularization, and the solution can now have greater values (in absolute value) of model weights than previously. Now the accuracy of the classifier on the training set improves to 0.831.
 
 
-```python
+```{code-cell} ipython3
 C = 1
 logit = LogisticRegression(C=C, random_state=17)
 logit.fit(X_poly, y)
@@ -170,7 +186,7 @@ print("Accuracy on training set:", round(logit.score(X_poly, y), 3))
 Then, why don't we increase $C$ even more - up to 10,000? Now, regularization is clearly not strong enough, and we see overfitting. Note that, with $C$=1 and a "smooth" boundary, the share of correct answers on the training set is not much lower than here. But one can easily imagine how our second model will work much better on new data.
 
 
-```python
+```{code-cell} ipython3
 C = 1e4
 logit = LogisticRegression(C=C, random_state=17)
 logit.fit(X_poly, y)
@@ -207,7 +223,7 @@ where
 Using this example, let's identify the optimal value of the regularization parameter $C$. This can be done using `LogisticRegressionCV` - a grid search of parameters followed by cross-validation. This class is designed specifically for logistic regression (effective algorithms with well-known search parameters). For an arbitrary model, use `GridSearchCV`, `RandomizedSearchCV`, or special algorithms for hyperparameter optimization such as the one implemented in `hyperopt`.
 
 
-```python
+```{code-cell} ipython3
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=17)
 
 c_values = np.logspace(-2, 3, 500)
@@ -217,14 +233,14 @@ logit_searcher.fit(X_poly, y)
 ```
 
 
-```python
+```{code-cell} ipython3
 logit_searcher.C_
 ```
 
 To see how the quality of the model (percentage of correct responses on the training and validation sets) varies with the hyperparameter $C$, we can plot the graph. 
 
 
-```python
+```{code-cell} ipython3
 plt.plot(c_values, np.mean(logit_searcher.scores_[1], axis=0))
 plt.xlabel("C")
 plt.ylabel("Mean CV-accuracy");
@@ -233,7 +249,7 @@ plt.ylabel("Mean CV-accuracy");
 Finally, select the area with the "best" values of $C$.
 
 
-```python
+```{code-cell} ipython3
 plt.plot(c_values, np.mean(logit_searcher.scores_[1], axis=0))
 plt.xlabel("C")
 plt.ylabel("Mean CV-accuracy")

@@ -1,18 +1,33 @@
+---
+jupytext:
+  formats: md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python3
+---
+
+(a3_solution)=
+
+# Assignment #3 (demo). Solution
+## Decision trees with a toy task and the UCI Adult dataset 
+
 <img src="https://habrastorage.org/webt/ia/m9/zk/iam9zkyzqebnf_okxipihkgjwnw.jpeg" />
     
 **<center>[mlcourse.ai](https://mlcourse.ai) – Open Machine Learning Course** </center><br>
 
 Authors: [Maria Sumarokova](https://www.linkedin.com/in/mariya-sumarokova-230b4054/), and [Yury Kashnitsky](https://www.linkedin.com/in/festline/). Translated and edited by Gleb Filatov, Aleksey Kiselev, [Anastasia Manokhina](https://www.linkedin.com/in/anastasiamanokhina/), [Egor Polusmak](https://www.linkedin.com/in/egor-polusmak/), and [Yuanyuan Pao](https://www.linkedin.com/in/yuanyuanpao/). All content is distributed under the [Creative Commons CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) license.
 
-# <center> Assignment #3 (demo). Solution
-## <center>  Decision trees with a toy task and the UCI Adult dataset 
 
 Same assignment as a [Kaggle Kernel](https://www.kaggle.com/kashnitsky/a3-demo-decision-trees) + [solution](https://www.kaggle.com/kashnitsky/a3-demo-decision-trees-solution). Fill in the answers in the [web-form](https://docs.google.com/forms/d/1wfWYYoqXTkZNOPy1wpewACXaj2MZjBdLOL58htGWYBA/edit).
 
 Let's start by loading all necessary libraries:
 
 
-```python
+```{code-cell} ipython3
 %matplotlib inline
 from matplotlib import pyplot as plt
 
@@ -38,7 +53,7 @@ We'll go through a toy example of binary classification - Person A is deciding w
 #### Creating the dataset
 
 
-```python
+```{code-cell} ipython3
 # Create dataframe with dummy variables
 def create_df(dic, feature_list):
     out = pd.DataFrame(dic)
@@ -54,14 +69,14 @@ def intersect_features(train, test):
 ```
 
 
-```python
+```{code-cell} ipython3
 features = ["Looks", "Alcoholic_beverage", "Eloquence", "Money_spent"]
 ```
 
 #### Training data
 
 
-```python
+```{code-cell} ipython3
 df_train = {}
 df_train["Looks"] = [
     "handsome",
@@ -84,7 +99,7 @@ df_train
 #### Test data
 
 
-```python
+```{code-cell} ipython3
 df_test = {}
 df_test["Looks"] = ["handsome", "handsome", "repulsive"]
 df_test["Alcoholic_beverage"] = ["no", "yes", "yes"]
@@ -95,7 +110,7 @@ df_test
 ```
 
 
-```python
+```{code-cell} ipython3
 # Some feature values are present in train and absent in test and vice-versa.
 y = df_train["Will_go"]
 df_train, df_test = intersect_features(train=df_train, test=df_test)
@@ -103,7 +118,7 @@ df_train
 ```
 
 
-```python
+```{code-cell} ipython3
 df_test
 ```
 
@@ -120,7 +135,7 @@ df_test
 #### Train a decision tree using sklearn on the training data. You may choose any depth for the tree.
 
 
-```python
+```{code-cell} ipython3
 dt = DecisionTreeClassifier(criterion="entropy", random_state=17)
 dt.fit(df_train, y);
 ```
@@ -128,7 +143,7 @@ dt.fit(df_train, y);
 #### Additional: display the resulting tree using graphviz.
 
 
-```python
+```{code-cell} ipython3
 plot_tree(
     dt, feature_names=df_train.columns, filled=True, class_names=["Won't go", "Will go"]
 );
@@ -139,7 +154,7 @@ plot_tree(
 Consider the following warm-up example: we have 9 blue balls and 11 yellow balls. Let ball have label **1** if it is blue, **0** otherwise.
 
 
-```python
+```{code-cell} ipython3
 balls = [1 for i in range(9)] + [0 for i in range(11)]
 ```
 
@@ -150,7 +165,7 @@ Next split the balls into two groups:
 <img src = '../../_static/img/decision_tree4.png'>
 
 
-```python
+```{code-cell} ipython3
 # two groups
 balls_left = [1 for i in range(8)] + [0 for i in range(5)]  # 8 blue and 5 yellow
 balls_right = [1 for i in range(1)] + [0 for i in range(6)]  # 1 blue and 6 yellow
@@ -159,7 +174,7 @@ balls_right = [1 for i in range(1)] + [0 for i in range(6)]  # 1 blue and 6 yell
 #### Implement a function to calculate the Shannon Entropy
 
 
-```python
+```{code-cell} ipython3
 from math import log
 
 
@@ -179,7 +194,7 @@ def entropy(a_list):
 Tests
 
 
-```python
+```{code-cell} ipython3
 print(entropy(balls))  # 9 blue and 11 yellow ones
 print(entropy(balls_left))  # 8 blue and 5 yellow ones
 print(entropy(balls_right))  # 1 blue and 6 yellow ones
@@ -195,7 +210,7 @@ print(entropy([1, 2, 3, 4, 5, 6]))  # entropy of a fair 6-sided die
 <font color='red'>Answer:</font> 2.585
 
 
-```python
+```{code-cell} ipython3
 # information gain calculation
 def information_gain(root, left, right):
     """ root - initial data, left and right - two partitions of initial data"""
@@ -208,7 +223,7 @@ def information_gain(root, left, right):
 ```
 
 
-```python
+```{code-cell} ipython3
 print(information_gain(balls, balls_left, balls_right))
 ```
 
@@ -217,7 +232,7 @@ print(information_gain(balls, balls_left, balls_right))
 <font color='red'>Answer:</font> 0.161
 
 
-```python
+```{code-cell} ipython3
 def information_gains(X, y):
     """Outputs information gain when splitting with each feature"""
     out = []
@@ -231,12 +246,12 @@ def information_gains(X, y):
 - Plot the resulting tree
 
 
-```python
+```{code-cell} ipython3
 information_gains(df_train, y)
 ```
 
 
-```python
+```{code-cell} ipython3
 def btree(X, y, feature_names):
     clf = information_gains(X, y)
     best_feat_id = clf.index(max(clf))
@@ -262,7 +277,7 @@ def btree(X, y, feature_names):
 ```
 
 
-```python
+```{code-cell} ipython3
 btree(df_train, y, df_train.columns)
 ```
 
@@ -296,7 +311,7 @@ Feature descriptions:
 #### Reading train and test data
 
 
-```python
+```{code-cell} ipython3
 # for Jupyter-book, we copy data from GitHub, locally, to save Internet traffic,
 # you can specify the data/ folder from the root of your cloned 
 # https://github.com/Yorko/mlcourse.ai repo, to save Internet traffic
@@ -304,27 +319,27 @@ DATA_PATH = "https://raw.githubusercontent.com/Yorko/mlcourse.ai/master/data/"
 ```
 
 
-```python
+```{code-cell} ipython3
 data_train = pd.read_csv(DATA_PATH + "adult_train.csv", sep=";")
 ```
 
 
-```python
+```{code-cell} ipython3
 data_train.tail()
 ```
 
 
-```python
+```{code-cell} ipython3
 data_test = pd.read_csv(DATA_PATH + "adult_test.csv", sep=";")
 ```
 
 
-```python
+```{code-cell} ipython3
 data_test.tail()
 ```
 
 
-```python
+```{code-cell} ipython3
 # necessary to remove rows with incorrect labels in test dataset
 data_test = data_test[
     (data_test["Target"] == " >50K.") | (data_test["Target"] == " <=50K.")
@@ -341,17 +356,17 @@ data_test.loc[data_test["Target"] == " >50K.", "Target"] = 1
 #### Primary data analysis
 
 
-```python
+```{code-cell} ipython3
 data_test.describe(include="all").T
 ```
 
 
-```python
+```{code-cell} ipython3
 data_train["Target"].value_counts()
 ```
 
 
-```python
+```{code-cell} ipython3
 fig = plt.figure(figsize=(25, 15))
 cols = 5
 rows = np.ceil(float(data_train.shape[1]) / cols)
@@ -369,26 +384,26 @@ plt.subplots_adjust(hspace=0.7, wspace=0.2)
 #### Checking data types
 
 
-```python
+```{code-cell} ipython3
 data_train.dtypes
 ```
 
 
-```python
+```{code-cell} ipython3
 data_test.dtypes
 ```
 
 As we see, in the test data, age is treated as type **object**. We need to fix this.
 
 
-```python
+```{code-cell} ipython3
 data_test["Age"] = data_test["Age"].astype(int)
 ```
 
 Also we'll cast all **float** features to **int** type to keep types consistent between our train and test data.
 
 
-```python
+```{code-cell} ipython3
 data_test["fnlwgt"] = data_test["fnlwgt"].astype(int)
 data_test["Education_Num"] = data_test["Education_Num"].astype(int)
 data_test["Capital_Gain"] = data_test["Capital_Gain"].astype(int)
@@ -399,13 +414,13 @@ data_test["Hours_per_week"] = data_test["Hours_per_week"].astype(int)
 #### Fill in missing data for continuous features with their median values, for categorical features with their mode.
 
 
-```python
+```{code-cell} ipython3
 # we see some missing values
 data_train.info()
 ```
 
 
-```python
+```{code-cell} ipython3
 # choose categorical and continuous features from data
 
 categorical_columns = [
@@ -420,7 +435,7 @@ print("numerical_columns:", numerical_columns)
 ```
 
 
-```python
+```{code-cell} ipython3
 # fill missing data
 
 for c in categorical_columns:
@@ -433,7 +448,7 @@ for c in numerical_columns:
 ```
 
 
-```python
+```{code-cell} ipython3
 # no more missing values
 data_train.info()
 ```
@@ -441,7 +456,7 @@ data_train.info()
 We'll dummy code some categorical features: **Workclass**, **Education**, **Martial_Status**, **Occupation**, **Relationship**, **Race**, **Sex**, **Country**. It can be done via pandas method **get_dummies**
 
 
-```python
+```{code-cell} ipython3
 data_train = pd.concat(
     [data_train[numerical_columns], pd.get_dummies(data_train[categorical_columns])],
     axis=1,
@@ -454,39 +469,39 @@ data_test = pd.concat(
 ```
 
 
-```python
+```{code-cell} ipython3
 set(data_train.columns) - set(data_test.columns)
 ```
 
 
-```python
+```{code-cell} ipython3
 data_train.shape, data_test.shape
 ```
 
 #### There is no Holland in the test data. Create new zero-valued feature.
 
 
-```python
+```{code-cell} ipython3
 data_test["Country_ Holand-Netherlands"] = 0
 ```
 
 
-```python
+```{code-cell} ipython3
 set(data_train.columns) - set(data_test.columns)
 ```
 
 
-```python
+```{code-cell} ipython3
 data_train.head(2)
 ```
 
 
-```python
+```{code-cell} ipython3
 data_test.head(2)
 ```
 
 
-```python
+```{code-cell} ipython3
 X_train = data_train.drop(["Target"], axis=1)
 y_train = data_train["Target"]
 
@@ -499,7 +514,7 @@ y_test = data_test["Target"]
 Train a decision tree **(DecisionTreeClassifier)** with a maximum depth of 3, and evaluate the accuracy metric on the test data. Use parameter **random_state = 17** for results reproducibility.
 
 
-```python
+```{code-cell} ipython3
 tree = DecisionTreeClassifier(max_depth=3, random_state=17)
 tree.fit(X_train, y_train)
 ```
@@ -507,12 +522,12 @@ tree.fit(X_train, y_train)
 Make a prediction with the trained model on the test data.
 
 
-```python
+```{code-cell} ipython3
 tree_predictions = tree.predict(X_test)
 ```
 
 
-```python
+```{code-cell} ipython3
 accuracy_score(y_test, tree_predictions)
 ```
 
@@ -523,7 +538,7 @@ accuracy_score(y_test, tree_predictions)
 Train a decision tree **(DecisionTreeClassifier, random_state = 17).** Find the optimal maximum depth using 5-fold cross-validation **(GridSearchCV)**.
 
 
-```python
+```{code-cell} ipython3
 %%time
 tree_params = {"max_depth": range(2, 11)}
 
@@ -535,7 +550,7 @@ locally_best_tree.fit(X_train, y_train)
 ```
 
 
-```python
+```{code-cell} ipython3
 print("Best params:", locally_best_tree.best_params_)
 print("Best cross validaton score", locally_best_tree.best_score_)
 ```
@@ -543,7 +558,7 @@ print("Best cross validaton score", locally_best_tree.best_score_)
 Train a decision tree with maximum depth of 9 (it is the best **max_depth** in my case), and compute the test set accuracy. Use parameter **random_state = 17** for reproducibility.
 
 
-```python
+```{code-cell} ipython3
 tuned_tree = DecisionTreeClassifier(max_depth=9, random_state=17)
 tuned_tree.fit(X_train, y_train)
 tuned_tree_predictions = tuned_tree.predict(X_test)
@@ -561,7 +576,7 @@ Let's take a sneak peek of upcoming lectures and try to use a random forest for 
 Train a random forest **(RandomForestClassifier)**. Set the number of trees to 100 and use **random_state = 17**.
 
 
-```python
+```{code-cell} ipython3
 rf = RandomForestClassifier(n_estimators=100, random_state=17)
 rf.fit(X_train, y_train)
 ```
@@ -569,25 +584,25 @@ rf.fit(X_train, y_train)
 Perfrom cross-validation.
 
 
-```python
+```{code-cell} ipython3
 %%time
 cv_scores = cross_val_score(rf, X_train, y_train, cv=3)
 ```
 
 
-```python
+```{code-cell} ipython3
 cv_scores, cv_scores.mean()
 ```
 
 Make predictions for the test data.
 
 
-```python
+```{code-cell} ipython3
 forest_predictions = rf.predict(X_test)
 ```
 
 
-```python
+```{code-cell} ipython3
 accuracy_score(y_test, forest_predictions)
 ```
 
@@ -596,7 +611,7 @@ accuracy_score(y_test, forest_predictions)
 Train a random forest **(RandomForestClassifier)** of 10 trees. Tune the maximum depth and maximum number of features for each tree using **GridSearchCV**. 
 
 
-```python
+```{code-cell} ipython3
 forest_params = {"max_depth": range(10, 16), "max_features": range(5, 105, 20)}
 
 locally_best_forest = GridSearchCV(
@@ -610,7 +625,7 @@ locally_best_forest.fit(X_train, y_train)
 ```
 
 
-```python
+```{code-cell} ipython3
 print("Best params:", locally_best_forest.best_params_)
 print("Best cross validaton score", locally_best_forest.best_score_)
 ```
@@ -618,7 +633,7 @@ print("Best cross validaton score", locally_best_forest.best_score_)
 Make predictions for the test data.
 
 
-```python
+```{code-cell} ipython3
 tuned_forest_predictions = locally_best_forest.predict(X_test)
 accuracy_score(y_test, tuned_forest_predictions)
 ```

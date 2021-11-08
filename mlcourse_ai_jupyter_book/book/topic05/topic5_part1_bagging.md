@@ -66,7 +66,7 @@ By repeating this procedure $\large M$ times, we create $\large M$ *bootstrap sa
 For our example, we'll use the familiar `telecom_churn` dataset. Previously, when we discussed feature importance, we saw that one of the most important features in this dataset is the number of calls to customer service. Let's visualize the data and look at the distribution of this feature.
 
 
-```python
+```{code-cell} ipython3
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -77,7 +77,7 @@ from matplotlib import pyplot as plt
 ```
 
 
-```python
+```{code-cell} ipython3
 # for Jupyter-book, we copy data from GitHub, locally, to save Internet traffic,
 # you can specify the data/ folder from the root of your cloned 
 # https://github.com/Yorko/mlcourse.ai repo, to save Internet traffic
@@ -85,7 +85,7 @@ DATA_PATH = "https://raw.githubusercontent.com/Yorko/mlcourse.ai/master/data/"
 ```
 
 
-```python
+```{code-cell} ipython3
 telecom_data = pd.read_csv(DATA_PATH + "telecom_churn.csv")
 
 telecom_data.loc[telecom_data["Churn"] == False, "Customer service calls"].hist(
@@ -102,7 +102,7 @@ plt.legend();
 Looks like loyal customers make fewer calls to customer service than those who eventually leave. Now, it might be a good idea to estimate the average number of customer service calls in each group. Since our dataset is small, we would not get a good estimate by simply calculating the mean of the original sample. We will be better off applying the bootstrap method. Let's generate 1000 new bootstrap samples from our original population and produce an interval estimate of the mean.
 
 
-```python
+```{code-cell} ipython3
 def get_bootstrap_samples(data, n_samples):
     """Generate bootstrap samples using the bootstrap method."""
     indices = np.random.randint(0, len(data), (n_samples, len(data)))

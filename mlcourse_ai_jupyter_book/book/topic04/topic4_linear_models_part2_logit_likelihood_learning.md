@@ -1,11 +1,26 @@
+---
+jupytext:
+  formats: md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python3
+---
+
+(topic4_part2)=
+
+
+# Topic 4. Linear Classification and Regression
+## Part 2. Linear Classification
+
 <img src="https://habrastorage.org/webt/ia/m9/zk/iam9zkyzqebnf_okxipihkgjwnw.jpeg" />
     
 **<center>[mlcourse.ai](https://mlcourse.ai) – Open Machine Learning Course** </center><br> 
 
 Author: [Yury Kashnitsky](https://yorko.github.io). Translated and edited by [Christina Butsko](https://www.linkedin.com/in/christinabutsko/), [Nerses Bagiyan](https://www.linkedin.com/in/nersesbagiyan/), [Yulia Klimushina](https://www.linkedin.com/in/yuliya-klimushina-7168a9139), and [Yuanyuan Pao](https://www.linkedin.com/in/yuanyuanpao/). This material is subject to the terms and conditions of the [Creative Commons CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) license. Free use is permitted for any non-commercial purpose.
-
-# <center>Topic 4. Linear Classification and Regression
-## <center> Part 2. Linear Classification
     
 ## Article outline
 1. [Linear Classifier](#1.-Linear-Classifier)

@@ -14,7 +14,7 @@ Author: [Yury Kashnitsky](https://www.linkedin.com/in/festline/). All content is
 **Fill in the missing code and choose answers in [this](https://docs.google.com/forms/d/1aHyK58W6oQmNaqEfvpLTpo6Cb0-ntnvJ18rZcvclkvw/edit) web form.**
 
 
-```python
+```{code-cell} ipython3
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -31,7 +31,7 @@ from sklearn.preprocessing import StandardScaler
 **We are working with UCI Wine quality dataset (no need to download it – it's already there, in course repo and in Kaggle Dataset).**
 
 
-```python
+```{code-cell} ipython3
 # for Jupyter-book, we copy data from GitHub, locally, to save Internet traffic,
 # you can specify the data/ folder from the root of your cloned 
 # https://github.com/Yorko/mlcourse.ai repo, to save Internet traffic
@@ -39,24 +39,24 @@ DATA_PATH = "https://raw.githubusercontent.com/Yorko/mlcourse.ai/master/data/"
 ```
 
 
-```python
+```{code-cell} ipython3
 data = pd.read_csv(DATA_PATH + "winequality-white.csv", sep=";")
 ```
 
 
-```python
+```{code-cell} ipython3
 data.head()
 ```
 
 
-```python
+```{code-cell} ipython3
 data.info()
 ```
 
 **Separate the target feature, split data in 7:3 proportion (30% form a holdout set, use random_state=17), and preprocess data with `StandardScaler`.**
 
 
-```python
+```{code-cell} ipython3
 y = data["quality"]
 X = data.drop("quality", axis=1)
 
@@ -73,7 +73,7 @@ X_holdout_scaled = scaler.transform(X_holdout)
 **Train a simple linear regression model (Ordinary Least Squares).**
 
 
-```python
+```{code-cell} ipython3
 linreg = LinearRegression()
 linreg.fit(X_train_scaled, y_train);
 ```
@@ -81,7 +81,7 @@ linreg.fit(X_train_scaled, y_train);
 **<font color='red'>Question 1:</font> What are mean squared errors of model predictions on train and holdout sets?**
 
 
-```python
+```{code-cell} ipython3
 print(
     "Mean squared error (train): %.3f"
     % mean_squared_error(y_train, linreg.predict(X_train_scaled))
@@ -97,7 +97,7 @@ print(
 **<font color='red'>Question 2:</font> Which feature this linear regression model treats as the most influential on wine quality?**
 
 
-```python
+```{code-cell} ipython3
 linreg_coef = pd.DataFrame(
     {"coef": linreg.coef_, "coef_abs": np.abs(linreg.coef_)},
     index=data.columns.drop("quality"),
@@ -110,7 +110,7 @@ linreg_coef.sort_values(by="coef_abs", ascending=False)
 **Train a LASSO model with $\alpha = 0.01$ (weak regularization) and scaled data. Again, set random_state=17.**
 
 
-```python
+```{code-cell} ipython3
 lasso1 = Lasso(alpha=0.01, random_state=17)
 lasso1.fit(X_train_scaled, y_train)
 ```
@@ -118,7 +118,7 @@ lasso1.fit(X_train_scaled, y_train)
 **Which feature is the least informative in predicting wine quality, according to this LASSO model?**
 
 
-```python
+```{code-cell} ipython3
 lasso1_coef = pd.DataFrame(
     {"coef": lasso1.coef_, "coef_abs": np.abs(lasso1.coef_)},
     index=data.columns.drop("quality"),
@@ -129,21 +129,21 @@ lasso1_coef.sort_values(by="coef_abs", ascending=False)
 **Train LassoCV with random_state=17 to choose the best value of $\alpha$ in 5-fold cross-validation.**
 
 
-```python
+```{code-cell} ipython3
 alphas = np.logspace(-6, 2, 200)
 lasso_cv = LassoCV(random_state=17, cv=5, alphas=alphas)
 lasso_cv.fit(X_train_scaled, y_train)
 ```
 
 
-```python
+```{code-cell} ipython3
 lasso_cv.alpha_
 ```
 
 **<font color='red'>Question 3:</font> Which feature is the least informative in predicting wine quality, according to the tuned LASSO model?**
 
 
-```python
+```{code-cell} ipython3
 lasso_cv_coef = pd.DataFrame(
     {"coef": lasso_cv.coef_, "coef_abs": np.abs(lasso_cv.coef_)},
     index=data.columns.drop("quality"),
@@ -154,7 +154,7 @@ lasso_cv_coef.sort_values(by="coef_abs", ascending=False)
 **<font color='red'>Question 4:</font> What are mean squared errors of tuned LASSO predictions on train and holdout sets?**
 
 
-```python
+```{code-cell} ipython3
 print(
     "Mean squared error (train): %.3f"
     % mean_squared_error(y_train, lasso_cv.predict(X_train_scaled))
@@ -170,7 +170,7 @@ print(
 **Train a Random Forest with out-of-the-box parameters, setting only random_state to be 17.**
 
 
-```python
+```{code-cell} ipython3
 forest = RandomForestRegressor(random_state=17)
 forest.fit(X_train_scaled, y_train)
 ```
@@ -178,7 +178,7 @@ forest.fit(X_train_scaled, y_train)
 **<font color='red'>Question 5:</font> What are mean squared errors of RF model on the training set, in cross-validation (cross_val_score with scoring='neg_mean_squared_error' and other arguments left with default values) and on holdout set?**
 
 
-```python
+```{code-cell} ipython3
 print(
     "Mean squared error (train): %.3f"
     % mean_squared_error(y_train, forest.predict(X_train_scaled))
@@ -202,7 +202,7 @@ print(
 **Tune the `max_features` and `max_depth` hyperparameters with GridSearchCV and again check mean cross-validation MSE and MSE on holdout set.**
 
 
-```python
+```{code-cell} ipython3
 forest_params = {"max_depth": list(range(10, 25)), "max_features": list(range(6, 12))}
 
 locally_best_forest = GridSearchCV(
@@ -217,14 +217,14 @@ locally_best_forest.fit(X_train_scaled, y_train)
 ```
 
 
-```python
+```{code-cell} ipython3
 locally_best_forest.best_params_, locally_best_forest.best_score_
 ```
 
 **<font color='red'>Question 6:</font> What are mean squared errors of tuned RF model in cross-validation (cross_val_score with scoring='neg_mean_squared_error' and other arguments left with default values) and on holdout set?**
 
 
-```python
+```{code-cell} ipython3
 print(
     "Mean squared error (cv): %.3f"
     % np.mean(
@@ -248,7 +248,7 @@ print(
 **<font color='red'>Question 7:</font> What is the most important feature, according to the Random Forest model?**
 
 
-```python
+```{code-cell} ipython3
 rf_importance = pd.DataFrame(
     locally_best_forest.best_estimator_.feature_importances_,
     columns=["coef"],

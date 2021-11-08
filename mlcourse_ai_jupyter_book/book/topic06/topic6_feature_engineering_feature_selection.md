@@ -15,7 +15,7 @@ To start, I wanted to review three similar but different tasks:
 This article will contain almost no math, but there will be a fair amount of code. Some examples will use the dataset from Renthop company, which is used in the [Two Sigma Connect: Rental Listing Inquiries Kaggle competition](https://www.kaggle.com/c/two-sigma-connect-rental-listing-inquiries). The file `train.json` is also kept [here](https://drive.google.com/open?id=1_lqydkMrmyNAgG4vU4wVmp6-j7tV0XI8) as `renthop_train.json.gz` (so do unpack it first). In this task, you need to predict the popularity of a new rental listing, i.e. classify the listing into three classes: `['low', 'medium' , 'high']`. To evaluate the solutions, we will use the log loss metric (the smaller, the better). Those who do not have a Kaggle account, will have to register; you will also need to accept the rules of the competition in order to download the data.
 
 
-```python
+```{code-cell} ipython3
 # preload dataset automatically, if not already in place.
 import os
 
@@ -41,7 +41,7 @@ load_renthop_dataset(url, file_name)
 ```
 
 
-```python
+```{code-cell} ipython3
 import numpy as np
 import pandas as pd
 
@@ -82,7 +82,7 @@ After tokenization, you will normalize the data. For text, this is about stemmin
 So, now that we have turned the document into a sequence of words, we can represent it with vectors. The easiest approach is called Bag of Words: we create a vector with the length of the vocabulary, compute the number of occurrences of each word in the text, and place that number of occurrences in the appropriate position in the vector. The process described looks simpler in code:
 
 
-```python
+```{code-cell} ipython3
 texts = ["i have a cat", "you have a dog", "you and i have a cat and a dog"]
 
 vocabulary = list(
@@ -117,7 +117,7 @@ This is an extremely naive implementation. In practice, you need to consider sto
 When using algorithms like Bag of Words, we lose the order of the words in the text, which means that the texts "i have no cows" and "no, i have cows" will appear identical after vectorization when, in fact, they have the opposite meaning. To avoid this problem, we can revisit our tokenization step and use N-grams (the *sequence* of N consecutive tokens) instead.
 
 
-```python
+```{code-cell} ipython3
 from sklearn.feature_extraction.text import CountVectorizer
 
 vect = CountVectorizer(ngram_range=(1, 1))
@@ -125,25 +125,25 @@ vect.fit_transform(["no i have cows", "i have no cows"]).toarray()
 ```
 
 
-```python
+```{code-cell} ipython3
 vect.vocabulary_
 ```
 
 
-```python
+```{code-cell} ipython3
 vect = CountVectorizer(ngram_range=(1, 2))
 vect.fit_transform(["no i have cows", "i have no cows"]).toarray()
 ```
 
 
-```python
+```{code-cell} ipython3
 vect.vocabulary_
 ```
 
 Also note that one does not have to use only words. In some cases, it is possible to generate N-grams of characters. This approach would be able to account for similarity of related words or handle typos.
 
 
-```python
+```{code-cell} ipython3
 from scipy.spatial.distance import euclidean
 from sklearn.feature_extraction.text import CountVectorizer
 
@@ -187,7 +187,7 @@ In a time when GPUs were weaker and the "renaissance of neural networks" had not
 Often for problems associated with images, a convolutional neural network is used. You do not have to come up with the architecture and train a network from scratch. Instead, download a pretrained state-of-the-art network with the weights from public sources. Data scientists often do so-called fine-tuning to adapt these networks to their needs by "detaching" the last fully connected layers of the network, adding new layers chosen for a specific task, and then training the network on new data. If your task is to just vectorize the image (for example, to use some non-network classifier), you only need to remove the last layers and use the output from the previous layers:
 
 
-```python
+```{code-cell} ipython3
 # doesn't work with Python 3.7
 # # Install Keras and tensorflow (https://keras.io/)
 # from keras.applications.resnet50 import ResNet50, preprocess_input
@@ -204,7 +204,7 @@ Often for problems associated with images, a convolutional neural network is use
 ```
 
 
-```python
+```{code-cell} ipython3
 # # In real life, you may need to pay more attention to resizing
 # img = img.resize((224, 224))
 
@@ -226,7 +226,7 @@ Nevertheless, we should not focus too much on neural network techniques. Feature
 
 If there is text on the image, you can read it without unraveling a complicated neural network. For example, check out [pytesseract](https://github.com/madmaze/pytesseract).
 
-```python
+```{code-cell} ipython3
 import pytesseract
 from PIL import Image
 import requests
@@ -246,7 +246,7 @@ Out: 'Google'
 
 One must understand that `pytesseract` is not a solution for everything.
 
-```python
+```{code-cell} ipython3
 ##### This time we take a picture from Renthop
 img = requests.get('https://photos.renthop.com/2/8393298_6acaf11f030217d05f3a5604b9a2f70f.jpg')
 img = Image.open(BytesIO(img.content))
@@ -267,7 +267,7 @@ If you have a lot of data, you will quickly reach the limits of external API. Be
 
 If you have a small amount of data, enough time, and no desire to extract fancy features, you can use `reverse_geocoder` in lieu of OpenStreetMap:
 
-```python
+```{code-cell} ipython3
 import reverse_geocoder as revgc
 
 revgc.search((df.latitude, df.longitude))
@@ -295,7 +295,7 @@ You would think that date and time are standardized because of their prevalence,
 
 Let's start with the day of the week, which are easy to turn into 7 dummy variables using one-hot encoding. In addition, we will also create a separate binary feature for the weekend called `is_weekend`.
 
-```python
+```{code-cell} ipython3
 df['dow'] = df['created'].apply(lambda x: x.date().weekday())
 df['is_weekend'] = df['created'].apply(lambda x: 1 if x.date().weekday() in (5, 6) else 0)
 ```
@@ -311,7 +311,7 @@ Dealing with hour (minute, day of the month ...) is not as simple as it seems. I
 There also exist some more esoteric approaches to such data like projecting the time onto a circle and using the two coordinates.
 
 
-```python
+```{code-cell} ipython3
 def make_harmonic_features(value, period=24):
     value *= 2 * np.pi / period
     return np.cos(value), np.sin(value)
@@ -320,19 +320,19 @@ def make_harmonic_features(value, period=24):
 This transformation preserves the distance between points, which is important for algorithms that estimate distance (kNN, SVM, k-means ...)
 
 
-```python
+```{code-cell} ipython3
 from scipy.spatial import distance
 
 euclidean(make_harmonic_features(23), make_harmonic_features(1))
 ```
 
 
-```python
+```{code-cell} ipython3
 euclidean(make_harmonic_features(9), make_harmonic_features(11))
 ```
 
 
-```python
+```{code-cell} ipython3
 euclidean(make_harmonic_features(9), make_harmonic_features(21))
 ```
 
@@ -345,7 +345,7 @@ Regarding time series — we will not go into too much detail here (mostly d
 If you are working with web data, then you usually have information about the user's User Agent. It is a wealth of information. First, one needs to extract the operating system from it. Secondly, make a feature `is_mobile`. Third, look at the browser.
 
 
-```python
+```{code-cell} ipython3
 # Install pyyaml ua-parser user-agents
 import user_agents
 
@@ -388,7 +388,7 @@ $$ \large z= \frac{x-\mu}{\sigma} $$
 Note that Standard Scaling does not make the distribution normal in the strict sense.
 
 
-```python
+```{code-cell} ipython3
 import numpy as np
 from scipy.stats import beta, shapiro
 from sklearn.preprocessing import StandardScaler
@@ -398,7 +398,7 @@ shapiro(data)
 ```
 
 
-```python
+```{code-cell} ipython3
 # Value of the statistic, p-value
 shapiro(StandardScaler().fit_transform(data))
 
@@ -408,13 +408,13 @@ shapiro(StandardScaler().fit_transform(data))
 But, to some extent, it protects against outliers:
 
 
-```python
+```{code-cell} ipython3
 data = np.array([1, 1, 0, -1, 2, 1, 2, 3, -2, 4, 100]).reshape(-1, 1).astype(np.float64)
 StandardScaler().fit_transform(data)
 ```
 
 
-```python
+```{code-cell} ipython3
 (data - data.mean()) / data.std()
 ```
 
@@ -423,14 +423,14 @@ Another fairly popular option is MinMax Scaling, which brings all the points wit
 $$ \large X_{norm}=\frac{X-X_{min}}{X_{max}-X_{min}} $$
 
 
-```python
+```{code-cell} ipython3
 from sklearn.preprocessing import MinMaxScaler
 
 MinMaxScaler().fit_transform(data)
 ```
 
 
-```python
+```{code-cell} ipython3
 (data - data.min()) / (data.max() - data.min())
 ```
 
@@ -439,7 +439,7 @@ StandardScaling and MinMax Scaling have similar applications and are often more 
 If we assume that some data is not normally distributed but is described by the [log-normal distribution](https://en.wikipedia.org/wiki/Log-normal_distribution), it can easily be transformed to a normal distribution:
 
 
-```python
+```{code-cell} ipython3
 from scipy.stats import lognorm
 
 data = lognorm(s=1).rvs(1000)
@@ -447,7 +447,7 @@ shapiro(data)
 ```
 
 
-```python
+```{code-cell} ipython3
 shapiro(np.log(data))
 ```
 
@@ -462,7 +462,7 @@ Q-Q plot for lognormal distribution
 Q-Q plot for the same distribution after taking the logarithm
 
 
-```python
+```{code-cell} ipython3
 # Let's draw plots!
 import statsmodels.api as sm
 
@@ -487,28 +487,28 @@ price_z = (
 Q-Q plot of the initial feature
 
 
-```python
+```{code-cell} ipython3
 sm.qqplot(price, loc=price.mean(), scale=price.std())
 ```
 
 Q-Q plot after StandardScaler. Shape doesn’t change
 
 
-```python
+```{code-cell} ipython3
 sm.qqplot(price_z, loc=price_z.mean(), scale=price_z.std())
 ```
 
 Q-Q plot after MinMaxScaler. Shape doesn’t change
 
 
-```python
+```{code-cell} ipython3
 sm.qqplot(price_mm, loc=price_mm.mean(), scale=price_mm.std())
 ```
 
 Q-Q plot after taking the logarithm. Things are getting better!
 
 
-```python
+```{code-cell} ipython3
 sm.qqplot(price_log, loc=price_log.mean(), scale=price_log.std())
 ```
 
@@ -521,7 +521,7 @@ If previous transformations seemed rather math-driven, this part is more about t
 Let’s come back again to the Two Sigma Connect: Rental Listing Inquiries problem. Among the features in this problem are the number of rooms and the price. Logic suggests that the cost per single room is more indicative than the total cost, so we can generate such a feature.
 
 
-```python
+```{code-cell} ipython3
 rooms = df["bedrooms"].apply(lambda x: max(x, 0.5))
 # Avoid division by zero; .5 is chosen more or less arbitrarily
 df["price_per_bedroom"] = df["price"] / rooms
@@ -553,7 +553,7 @@ Why would it even be necessary to select features? To some, this idea may seem c
 The most obvious candidate for removal is a feature whose value remains unchanged, i.e., it contains no information at all. If we build on this thought, it is reasonable to say that features with low variance are worse than those with high variance. So, one can consider cutting features with variance below a certain threshold.
 
 
-```python
+```{code-cell} ipython3
 from sklearn.datasets import make_classification
 from sklearn.feature_selection import VarianceThreshold
 
@@ -562,24 +562,24 @@ x_data_generated.shape
 ```
 
 
-```python
+```{code-cell} ipython3
 VarianceThreshold(0.7).fit_transform(x_data_generated).shape
 ```
 
 
-```python
+```{code-cell} ipython3
 VarianceThreshold(0.8).fit_transform(x_data_generated).shape
 ```
 
 
-```python
+```{code-cell} ipython3
 VarianceThreshold(0.9).fit_transform(x_data_generated).shape
 ```
 
 There are other ways that are also [based on classical statistics](http://scikit-learn.org/stable/modules/feature_selection.html#univariate-feature-selection).
 
 
-```python
+```{code-cell} ipython3
 from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score
@@ -591,26 +591,26 @@ x_data_varth = VarianceThreshold(0.9).fit_transform(x_data_generated)
 ```
 
 
-```python
+```{code-cell} ipython3
 logit = LogisticRegression(solver="lbfgs", random_state=17)
 ```
 
 
-```python
+```{code-cell} ipython3
 cross_val_score(
     logit, x_data_generated, y_data_generated, scoring="neg_log_loss", cv=5
 ).mean()
 ```
 
 
-```python
+```{code-cell} ipython3
 cross_val_score(
     logit, x_data_kbest, y_data_generated, scoring="neg_log_loss", cv=5
 ).mean()
 ```
 
 
-```python
+```{code-cell} ipython3
 cross_val_score(
     logit, x_data_varth, y_data_generated, scoring="neg_log_loss", cv=5
 ).mean()
@@ -623,7 +623,7 @@ We can see that our selected features have improved the quality of the classifie
 Another approach is to use some baseline model for feature evaluation because the model will clearly show the importance of the features. Two types of models are usually used: some “wooden” composition such as [Random Forest](https://medium.com/open-machine-learning-course/open-machine-learning-course-topic-5-ensembles-of-algorithms-and-random-forest-8e05246cbba7) or a linear model with Lasso regularization so that it is prone to nullify weights of weak features. The logic is intuitive: if features are clearly useless in a simple model, there is no need to drag them to a more complex one.
 
 
-```python
+```{code-cell} ipython3
 # Synthetic example
 
 from sklearn.datasets import make_classification
@@ -657,7 +657,7 @@ print(
 We must not forget that this is not a silver bullet again - it can make the performance worse.
 
 
-```python
+```{code-cell} ipython3
 # x_data, y_data = get_data()
 x_data = x_data_generated
 y_data = y_data_generated
@@ -684,7 +684,7 @@ Searching all combinations usually takes too long, so you can try to reduce the 
 This algorithm can be reversed: start with the complete feature space and remove features one by one until it does not impair the quality of the model or until the desired number of features is reached.
 
 
-```python
+```{code-cell} ipython3
 # # Install mlxtend
 # from mlxtend.feature_selection import SequentialFeatureSelector
 

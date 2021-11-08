@@ -1,12 +1,25 @@
-<center>
-<img src="../../img/ods_stickers.jpg">
-    
-## [mlcourse.ai](https://mlcourse.ai) - Open Machine Learning Course
+---
+jupytext:
+  formats: md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python3
+---
+
+(a4_demo)=
+
+
+# Assignment 4 (demo)
+## Sarcasm detection with logistic regression
+
+<img src="https://habrastorage.org/webt/ia/m9/zk/iam9zkyzqebnf_okxipihkgjwnw.jpeg" />
 
 Author: [Yury Kashnitsky](https://www.linkedin.com/in/festline/). All content is distributed under the [Creative Commons CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) license.
 
-## <center> Assignment 4 (demo)
-### <center>  Sarcasm detection with logistic regression
     
 **Same assignment as a [Kaggle Kernel](https://www.kaggle.com/kashnitsky/a4-demo-sarcasm-detection-with-logit) + [solution](https://www.kaggle.com/kashnitsky/a4-demo-sarcasm-detection-with-logit-solution).**
 
@@ -17,7 +30,7 @@ Sarcasm detection is easy.
 <img src="https://habrastorage.org/webt/1f/0d/ta/1f0dtavsd14ncf17gbsy1cvoga4.jpeg" />
 
 
-```python
+```{code-cell} ipython3
 # some necessary imports
 import os
 
@@ -33,7 +46,7 @@ from sklearn.pipeline import Pipeline
 ```
 
 
-```python
+```{code-cell} ipython3
 # for Jupyter-book, we copy data from GitHub, locally, to save Internet traffic,
 # you can specify the data/ folder from the root of your cloned 
 # https://github.com/Yorko/mlcourse.ai repo, to save Internet traffic
@@ -41,38 +54,38 @@ DATA_URL = "https://raw.githubusercontent.com/Yorko/mlcourse.ai/master/data/"
 ```
 
 
-```python
+```{code-cell} ipython3
 train_df = pd.read_csv(DATA_URL + "train-balanced-sarcasm.csv")
 ```
 
 
-```python
+```{code-cell} ipython3
 train_df.head()
 ```
 
 
-```python
+```{code-cell} ipython3
 train_df.info()
 ```
 
 Some comments are missing, so we drop the corresponding rows.
 
 
-```python
+```{code-cell} ipython3
 train_df.dropna(subset=["comment"], inplace=True)
 ```
 
 We notice that the dataset is indeed balanced
 
 
-```python
+```{code-cell} ipython3
 train_df["label"].value_counts()
 ```
 
 We split data into training and validation parts.
 
 
-```python
+```{code-cell} ipython3
 train_texts, valid_texts, y_train, y_valid = train_test_split(
     train_df["comment"], train_df["label"], random_state=17
 )

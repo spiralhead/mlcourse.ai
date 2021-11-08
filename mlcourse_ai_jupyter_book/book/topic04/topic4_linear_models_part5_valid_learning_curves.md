@@ -1,14 +1,30 @@
+---
+jupytext:
+  formats: md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python3
+---
+
+(topic4_part5)=
+
+
+# Topic 4. Linear Classification and Regression
+## Part 5. Validation and Learning Curves
+
 <img src="https://habrastorage.org/webt/ia/m9/zk/iam9zkyzqebnf_okxipihkgjwnw.jpeg" />
     
 **<center>[mlcourse.ai](https://mlcourse.ai) – Open Machine Learning Course** </center><br>
 
 Author: [Yury Kashnitsky](https://yorko.github.io). Translated and edited by [Christina Butsko](https://www.linkedin.com/in/christinabutsko/), [Nerses Bagiyan](https://www.linkedin.com/in/nersesbagiyan/), [Yulia Klimushina](https://www.linkedin.com/in/yuliya-klimushina-7168a9139), and [Yuanyuan Pao](https://www.linkedin.com/in/yuanyuanpao/). This material is subject to the terms and conditions of the [Creative Commons CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) license. Free use is permitted for any non-commercial purpose.
 
-# <center>Topic 4. Linear Classification and Regression
-## <center> Part 5. Validation and Learning Curves
 
 
-```python
+```{code-cell} ipython3
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -32,7 +48,7 @@ The answers to these questions are not obvious. In particular, sometimes a more 
 We will work our data on customer churn of telecom operator.
 
 
-```python
+```{code-cell} ipython3
 # for Jupyter-book, we copy data from GitHub, locally, to save Internet traffic,
 # you can specify the data/ folder from the root of your cloned 
 # https://github.com/Yorko/mlcourse.ai repo, to save Internet traffic
@@ -40,7 +56,7 @@ DATA_PATH = "https://raw.githubusercontent.com/Yorko/mlcourse.ai/master/data/"
 ```
 
 
-```python
+```{code-cell} ipython3
 data = pd.read_csv(DATA_PATH + "telecom_churn.csv").drop("State", axis=1)
 data["International plan"] = data["International plan"].map({"Yes": 1, "No": 0})
 data["Voice mail plan"] = data["Voice mail plan"].map({"Yes": 1, "No": 0})
@@ -52,7 +68,7 @@ X = data.drop("Churn", axis=1).values
 **We will train logistic regression with stochastic gradient descent. Later in the course, we will have a separate article on this topic.**
 
 
-```python
+```{code-cell} ipython3
 alphas = np.logspace(-2, 0, 20)
 sgd_logit = SGDClassifier(loss="log", n_jobs=-1, random_state=17, max_iter=5)
 logit_pipe = Pipeline(
@@ -70,7 +86,7 @@ val_train, val_test = validation_curve(
 **As a first step, we will construct validation curves showing how the quality (ROC-AUC) on training and test sets varies with the regularization parameter.**
 
 
-```python
+```{code-cell} ipython3
 def plot_with_err(x, data, **kwargs):
     mu, std = data.mean(1), data.std(1)
     lines = plt.plot(x, mu, "-", **kwargs)
@@ -109,7 +125,7 @@ Since the new data can be unavailable, it is reasonable to vary the size of the 
 The idea is simple: we display the error as a function of the number of examples used in training. The parameters of the model are fixed in advance.
 
 
-```python
+```{code-cell} ipython3
 def plot_learning_curve(degree=2, alpha=0.01):
     train_sizes = np.linspace(0.05, 1, 20)
     logit_pipe = Pipeline(
@@ -136,7 +152,7 @@ def plot_learning_curve(degree=2, alpha=0.01):
 Let's see what we get for the linear model. We will set the regularization coefficient to be quite large.
 
 
-```python
+```{code-cell} ipython3
 plot_learning_curve(degree=2, alpha=10)
 ```
 
@@ -151,7 +167,7 @@ What happens if we reduce the regularization coefficient to 0.05?
 We see a good trend - the curves gradually converge, and if we move farther to the right i.e. add more data to the model, we can improve the quality on the validation set even more. 
 
 
-```python
+```{code-cell} ipython3
 plot_learning_curve(degree=2, alpha=0.05)
 ```
 
@@ -160,7 +176,7 @@ Now, what if we make the model even more complex by setting alpha = 10-4?
 Overfitting is seen - AUC decreases on both the training and the validation sets.
 
 
-```python
+```{code-cell} ipython3
 plot_learning_curve(degree=2, alpha=1e-4)
 ```
 
@@ -195,6 +211,6 @@ Constructing these curves can help understand which way to go and how to properl
 - [Implementations](https://github.com/rushter/MLAlgorithms) of many ML algorithms. Search for linear regression and logistic regression.
 
 
-```python
+```{code-cell} ipython3
 
 ```

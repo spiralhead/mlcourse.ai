@@ -280,7 +280,7 @@ In general, grouping data in Pandas works as follows:
 
 
 
-```python
+```{code-cell} ipython3
 df.groupby(by=grouping_columns)[columns_to_show].function()
 ```
 

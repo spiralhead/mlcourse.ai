@@ -162,7 +162,7 @@ $${FI}_j=\frac{\sum_{t=1}^N {FI}_j^{(t)}}{N}$$
 Those are pretty confusing formulas so let's demonstrate each step with the Iris Dataset.
 
 
-```python
+```{code-cell} ipython3
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -175,7 +175,7 @@ target = iris["target"]
 ```
 
 
-```python
+```{code-cell} ipython3
 data = pd.DataFrame(data, columns=iris["feature_names"])
 data.head()
 ```
@@ -183,14 +183,14 @@ data.head()
 Since our aim is just to demonstrate the sequence of steps in calculating feature importances we'll transform the `target` variable as for classifying Iris Virginica One-To-All.
 
 
-```python
+```{code-cell} ipython3
 target = pd.Series(target).map({0: 0, 1: 0, 2: 1})
 ```
 
 Creating Random Forest. For reproducibility, we set `random_state=17`. For the sake of simplicity we set the number of trees to 3 and limit the depth of trees in ensemble to be not greater than 3.
 
 
-```python
+```{code-cell} ipython3
 from sklearn.ensemble import RandomForestClassifier
 
 rfc = RandomForestClassifier(n_estimators=3, max_depth=3, random_state=17)
@@ -200,14 +200,14 @@ rfc.fit(data, target);
 After fitting list of all the trees are stored in `estimators_` property.
 
 
-```python
+```{code-cell} ipython3
 tree_list = rfc.estimators_
 ```
 
 Visualizing trees
 
 
-```python
+```{code-cell} ipython3
 from sklearn import tree
 
 plt.figure(figsize=(16, 12))
@@ -221,7 +221,7 @@ tree.plot_tree(
 ```
 
 
-```python
+```{code-cell} ipython3
 plt.figure(figsize=(16, 12))
 tree.plot_tree(
     tree_list[1],
@@ -233,7 +233,7 @@ tree.plot_tree(
 ```
 
 
-```python
+```{code-cell} ipython3
 plt.figure(figsize=(6, 4))
 tree.plot_tree(
     tree_list[2],
@@ -287,7 +287,7 @@ $$\begin{array}{c|ccc|c}
 Let's compare our result with those stored in the `feature_importances_` attribute.
 
 
-```python
+```{code-cell} ipython3
 print(iris["feature_names"])
 print(rfc.feature_importances_)
 ```
@@ -299,12 +299,12 @@ Voila!
 Let's consider the results of a survey given to visitors of hostels listed on Booking.com and TripAdvisor.com. Our features here are the average ratings for different categories including service quality, room condition, value for money, etc. Our target variable is the hostel's overall rating on the website.
 
 
-```python
+```{code-cell} ipython3
 from sklearn.ensemble.forest import RandomForestRegressor
 ```
 
 
-```python
+```{code-cell} ipython3
 # for Jupyter-book, we copy data from GitHub, locally, to save Internet traffic,
 # you can specify the data/ folder from the root of your cloned 
 # https://github.com/Yorko/mlcourse.ai repo, to save Internet traffic
@@ -312,7 +312,7 @@ DATA_PATH = "https://raw.githubusercontent.com/Yorko/mlcourse.ai/master/data/"
 ```
 
 
-```python
+```{code-cell} ipython3
 hostel_data = pd.read_csv(DATA_PATH + "hostel_factors.csv")
 features = {
     "f1": u"Staff",

@@ -25,7 +25,7 @@ This week, we’ll cover two reasons for Vowpal Wabbit’s exceptional training 
 5. [Useful resources](#5.-Useful-resources)
 
 
-```python
+```{code-cell} ipython3
 import os
 import re
 import warnings
@@ -48,7 +48,7 @@ import seaborn as sns
 ```
 
 
-```python
+```{code-cell} ipython3
 warnings.filterwarnings("ignore")
 ```
 
@@ -68,7 +68,7 @@ Here is a snowboarder (me) in Sheregesh, Russia's most popular winter resort. (I
 The paired regression problem can be solved with gradient descent. Let us predict one variable using another: height with weight. Assume that these variables are linearly dependent. We will use the [SOCR](http://wiki.stat.ucla.edu/socr/index.php/SOCR_Data) dataset. 
 
 
-```python
+```{code-cell} ipython3
 # for Jupyter-book, we copy data from GitHub, locally, to save Internet traffic,
 # you can specify the data/ folder from the root of your cloned 
 # https://github.com/Yorko/mlcourse.ai repo, to save Internet traffic
@@ -76,13 +76,13 @@ DATA_PATH = "https://raw.githubusercontent.com/Yorko/mlcourse.ai/master/data/"
 ```
 
 
-```python
+```{code-cell} ipython3
 PATH_TO_WRITE_DATA = "../../tmp/"
 data_demo = pd.read_csv(os.path.join(DATA_PATH, "weights_heights.csv"))
 ```
 
 
-```python
+```{code-cell} ipython3
 plt.scatter(data_demo["Weight"], data_demo["Height"])
 plt.xlabel("Weight in lb")
 plt.ylabel("Height in inches");
@@ -148,7 +148,7 @@ Many classification and regression algorithms operate in Euclidean or metric spa
 Let's explore the [UCI bank marketing dataset](https://archive.ics.uci.edu/ml/datasets/bank+marketing) where most of  features are categorical.
 
 
-```python
+```{code-cell} ipython3
 df = pd.read_csv(os.path.join(DATA_PATH, "bank_train.csv"))
 labels = pd.read_csv(
     os.path.join(DATA_PATH, "bank_train_target.csv"), header=None
@@ -327,7 +327,7 @@ We can see that most of features are not represented by numbers. This poses a pr
 Let's dive into the "education" feature.
 
 
-```python
+```{code-cell} ipython3
 df["education"].value_counts().plot.barh();
 ```
 
@@ -340,14 +340,14 @@ df["education"].value_counts().plot.barh();
 The most straightforward solution is to map each value of this feature into a unique number. For example, we can map  `university.degree` to 0, `basic.9y` to 1, and so on. You can use `sklearn.preprocessing.LabelEncoder` to perform this mapping.
 
 
-```python
+```{code-cell} ipython3
 label_encoder = LabelEncoder()
 ```
 
 The `fit` method of this class finds all unique values and builds the actual mapping between categories and numbers, and the `transform` method  converts the categories into numbers. After `fit` is executed, `label_encoder` will have the `classes_` attribute with all unique values of the feature. Let us count them to make sure the transformation was correct.
 
 
-```python
+```{code-cell} ipython3
 mapped_education = pd.Series(label_encoder.fit_transform(df["education"]))
 mapped_education.value_counts().plot.barh()
 print(dict(enumerate(label_encoder.classes_)))
@@ -363,7 +363,7 @@ print(dict(enumerate(label_encoder.classes_)))
 
 
 
-```python
+```{code-cell} ipython3
 df["education"] = mapped_education
 df.head()
 ```
@@ -536,7 +536,7 @@ df.head()
 Let's apply the transformation to other columns of type `object`.
 
 
-```python
+```{code-cell} ipython3
 categorical_columns = df.columns[df.dtypes == "object"].union(["education"])
 for column in categorical_columns:
     df[column] = label_encoder.fit_transform(df[column])
@@ -713,7 +713,7 @@ The main issue with this approach is that we have now introduced some relative o
 For example, we implicitly introduced algebra over the values of the job feature where we can now substract the job of client #2 from the job of client #1 :
 
 
-```python
+```{code-cell} ipython3
 df.loc[1].job - df.loc[2].job
 ```
 
@@ -727,7 +727,7 @@ df.loc[1].job - df.loc[2].job
 Does this operation make any sense? Not really. Let's try to train logisitic regression with this feature transformation.
 
 
-```python
+```{code-cell} ipython3
 def logistic_regression_accuracy_on(dataframe, labels):
     features = dataframe
     train_features, test_features, train_labels, test_labels = train_test_split(
@@ -760,7 +760,7 @@ We can see that logistic regression never predicts class 1. In order to use line
 Suppose that some feature can have one of 10 unique values. One-hot encoding creates 10 new features corresponding to these unique values, all of them *except one* are zeros.
 
 
-```python
+```{code-cell} ipython3
 one_hot_example = pd.DataFrame([{i: 0 for i in range(10)}])
 one_hot_example.loc[0, 6] = 1
 one_hot_example
@@ -822,12 +822,12 @@ one_hot_example
 This idea is implemented in the `OneHotEncoder` class from `sklearn.preprocessing`. By default `OneHotEncoder` transforms data into a sparse matrix to save memory space because most of the values are zeroes and because we do not want to take up more RAM. However, in this particular example, we do not encounter such problems, so we are going to use a "dense" matrix representation.
 
 
-```python
+```{code-cell} ipython3
 onehot_encoder = OneHotEncoder(sparse=False)
 ```
 
 
-```python
+```{code-cell} ipython3
 encoded_categorical_columns = pd.DataFrame(
     onehot_encoder.fit_transform(df[categorical_columns])
 )
@@ -1009,7 +1009,7 @@ encoded_categorical_columns.head()
 We have 53 columns that correspond to the number of unique values of categorical features in our data set. When transformed with One-Hot Encoding, this data can be used with linear models:
 
 
-```python
+```{code-cell} ipython3
 print(logistic_regression_accuracy_on(encoded_categorical_columns, labels))
 ```
 
@@ -1032,7 +1032,7 @@ There is a simple approach to vectorization of categorical data based on hashing
 Hash functions can help us find unique codes for different feature values, for example:
 
 
-```python
+```{code-cell} ipython3
 for s in ("university.degree", "high.school", "illiterate"):
     print(s, "->", hash(s))
 ```
@@ -1045,7 +1045,7 @@ for s in ("university.degree", "high.school", "illiterate"):
 We will not use negative values or values of high magnitude, so we restrict the range of values for the hash function:
 
 
-```python
+```{code-cell} ipython3
 hash_space = 25
 for s in ("university.degree", "high.school", "illiterate"):
     print(s, "->", hash(s) % hash_space)
@@ -1059,7 +1059,7 @@ for s in ("university.degree", "high.school", "illiterate"):
 Imagine that our data set contains a single (i.e. not married) student, who received a call on Monday. His feature vectors will be created similarly as in the case of One-Hot Encoding but in the space with fixed range for all features:
 
 
-```python
+```{code-cell} ipython3
 hashing_example = pd.DataFrame([{i: 0.0 for i in range(hash_space)}])
 for s in ("job=student", "marital=single", "day_of_week=mon"):
     print(s, "->", hash(s) % hash_space)
@@ -1151,7 +1151,7 @@ hashing_example
 We want to point out that we hash not only feature values but also pairs of **feature name + feature value**. It is important to do this so that we can distinguish the same values of different features.
 
 
-```python
+```{code-cell} ipython3
 assert hash("no") == hash("no")
 assert hash("housing=no") != hash("loan=no")
 ```
@@ -1172,7 +1172,7 @@ A good analysis of hash collisions, their dependency on feature space and hashin
 Shell is the main interface for VW.
 
 
-```python
+```{code-cell} ipython3
 !vw --help
 ```
 
@@ -1818,7 +1818,7 @@ The following string matches the VW format:
 Let's check the format by running VW with this training sample:
 
 
-```python
+```{code-cell} ipython3
 ! echo '1 1.0 |Subject WHAT car is this |Organization University of Maryland:0.5 College Park' | vw
 ```
 
@@ -1849,13 +1849,13 @@ VW is a wonderful tool for working with text data. We'll illustrate it with the 
 ### 3.1. News. Binary classification.
 
 
-```python
+```{code-cell} ipython3
 # load data with sklearn's function
 newsgroups = fetch_20newsgroups(data_home=PATH_TO_WRITE_DATA)
 ```
 
 
-```python
+```{code-cell} ipython3
 newsgroups["target_names"]
 ```
 
@@ -1888,7 +1888,7 @@ newsgroups["target_names"]
 Lets look at the first document in this collection:
 
 
-```python
+```{code-cell} ipython3
 text = newsgroups["data"][0]
 target = newsgroups["target_names"][newsgroups["target"][0]]
 
@@ -1925,7 +1925,7 @@ print("----")
 Now we convert the data into something Vowpal Wabbit can understand. We will throw away words shorter than 3 symbols. Here, we will skip some important NLP stages such as stemming and lemmatization; however, we will later see that VW solves the problem even without these steps.
 
 
-```python
+```{code-cell} ipython3
 def to_vw_format(document, label=None):
     return (
         str(label or "")
@@ -1948,7 +1948,7 @@ to_vw_format(text, 1 if target == "rec.autos" else -1)
 We split the dataset into train and test and write these into separate files. We will consider a document as positive if it corresponds to **rec.autos**. Thus, we are constructing a model which distinguishes articles about cars from other topics: 
 
 
-```python
+```{code-cell} ipython3
 all_documents = newsgroups["data"]
 all_targets = [
     1 if newsgroups["target_names"][target] == "rec.autos" else -1
@@ -1957,7 +1957,7 @@ all_targets = [
 ```
 
 
-```python
+```{code-cell} ipython3
 train_documents, test_documents, train_labels, test_labels = train_test_split(
     all_documents, all_targets, random_state=7
 )
@@ -1973,7 +1973,7 @@ with open(os.path.join(PATH_TO_WRITE_DATA, "20news_test.vw"), "w") as vw_test_da
 Now, we pass the created training file to Vowpal Wabbit. We solve the classification problem with a hinge loss function (linear SVM). The trained model will be saved in the `20news_model.vw` file:
 
 
-```python
+```{code-cell} ipython3
 !vw -d $PATH_TO_WRITE_DATA/20news_train.vw \
  --loss_function hinge -f $PATH_TO_WRITE_DATA/20news_model.vw
 ```
@@ -2016,7 +2016,7 @@ Now, we pass the created training file to Vowpal Wabbit. We solve the classifica
 VW prints a lot of interesting info while training (one can suppress it with the `--quiet` parameter). You can see documentation of the diagnostic output on [GitHub](https://github.com/JohnLangford/vowpal_wabbit/wiki/Tutorial#vws-diagnostic-information). Note how average loss drops while training. For loss computation, VW uses samples it has never seen before, so this measure is usually accurate. Now, we apply our trained model to the test set, saving predictions into a file with the `-p` flag:  
 
 
-```python
+```{code-cell} ipython3
 !vw -i $PATH_TO_WRITE_DATA/20news_model.vw -t -d $PATH_TO_WRITE_DATA/20news_test.vw \
 -p $PATH_TO_WRITE_DATA/20news_test_predictions.txt
 ```
@@ -2056,7 +2056,7 @@ VW prints a lot of interesting info while training (one can suppress it with the
 Now we load our predictions, compute AUC, and plot the ROC curve:
 
 
-```python
+```{code-cell} ipython3
 with open(os.path.join(PATH_TO_WRITE_DATA, "20news_test_predictions.txt")) as pred_file:
     test_prediction = [float(label) for label in pred_file.readlines()]
 
@@ -2085,7 +2085,7 @@ The AUC value we get shows that we have achieved high classification quality.
 We will use the same news dataset, but, this time, we will solve a multiclass classification problem. `Vowpal Wabbit` is a little picky – it wants labels starting from 1 till K, where K – is the number of classes in the classification task (20 in our case). So we will use LabelEncoder and add 1 afterwards (recall that `LabelEncoder` maps labels into range from 0 to K-1).
 
 
-```python
+```{code-cell} ipython3
 all_documents = newsgroups["data"]
 topic_encoder = LabelEncoder()
 all_targets_mult = topic_encoder.fit_transform(newsgroups["target"]) + 1
@@ -2094,7 +2094,7 @@ all_targets_mult = topic_encoder.fit_transform(newsgroups["target"]) + 1
 **The data is the same, but we have changed the labels, train_labels_mult and test_labels_mult, into label vectors from 1 to 20.**
 
 
-```python
+```{code-cell} ipython3
 train_documents, test_documents, train_labels_mult, test_labels_mult = train_test_split(
     all_documents, all_targets_mult, random_state=7
 )
@@ -2116,7 +2116,7 @@ We train Vowpal Wabbit in multiclass classification mode, passing the `oaa` para
 Additionally, we can try automatic Vowpal Wabbit parameter tuning with [Hyperopt](https://github.com/hyperopt/hyperopt).
 
 
-```python
+```{code-cell} ipython3
 %%time
 !vw --oaa 20 $PATH_TO_WRITE_DATA/20news_train_mult.vw -f $PATH_TO_WRITE_DATA/20news_model_mult.vw \
 --loss_function=hinge
@@ -2158,7 +2158,7 @@ Additionally, we can try automatic Vowpal Wabbit parameter tuning with [Hyperopt
 
 
 
-```python
+```{code-cell} ipython3
 %%time
 !vw -i $PATH_TO_WRITE_DATA/20news_model_mult.vw -t -d $PATH_TO_WRITE_DATA/20news_test_mult.vw \
 -p $PATH_TO_WRITE_DATA/20news_test_predictions_mult.txt
@@ -2199,7 +2199,7 @@ Additionally, we can try automatic Vowpal Wabbit parameter tuning with [Hyperopt
 
 
 
-```python
+```{code-cell} ipython3
 with open(
     os.path.join(PATH_TO_WRITE_DATA, "20news_test_predictions_mult.txt")
 ) as pred_file:
@@ -2207,7 +2207,7 @@ with open(
 ```
 
 
-```python
+```{code-cell} ipython3
 accuracy_score(test_labels_mult, test_prediction_mult)
 ```
 
@@ -2221,7 +2221,7 @@ accuracy_score(test_labels_mult, test_prediction_mult)
 Here is how often the model misclassifies atheism with other topics:
 
 
-```python
+```{code-cell} ipython3
 M = confusion_matrix(test_labels_mult, test_prediction_mult)
 for i in np.where(M[0, :] > 0)[0][1:]:
     print(newsgroups["target_names"][i], M[0, i])
@@ -2240,7 +2240,7 @@ In this part we will do binary classification of [IMDB](http://www.imdb.com) (In
 Using the `load_files` function from `sklearn.datasets`, we load the movie reviews datasets. It's the same dataset we used in topic04 part4 notebook.
 
 
-```python
+```{code-cell} ipython3
 import tarfile
 # Download the dataset if not already in place
 from io import BytesIO
@@ -2276,7 +2276,7 @@ load_imdb_dataset()
 Read train data, separate labels.
 
 
-```python
+```{code-cell} ipython3
 PATH_TO_IMDB = PATH_TO_WRITE_DATA + "aclImdb"
 
 reviews_train = load_files(
@@ -2287,7 +2287,7 @@ text_train, y_train = reviews_train.data, reviews_train.target
 ```
 
 
-```python
+```{code-cell} ipython3
 print("Number of documents in training data: %d" % len(text_train))
 print(np.bincount(y_train))
 ```
@@ -2299,13 +2299,13 @@ print(np.bincount(y_train))
 Do the same for the test set.
 
 
-```python
+```{code-cell} ipython3
 reviews_test = load_files(os.path.join(PATH_TO_IMDB, "test"), categories=["pos", "neg"])
 text_test, y_test = reviews_test.data, reviews_test.target
 ```
 
 
-```python
+```{code-cell} ipython3
 print("Number of documents in test data: %d" % len(text_test))
 print(np.bincount(y_test))
 ```
@@ -2317,7 +2317,7 @@ print(np.bincount(y_test))
 Take a look at examples of reviews and their corresponding labels.
 
 
-```python
+```{code-cell} ipython3
 text_train[0]
 ```
 
@@ -2329,7 +2329,7 @@ text_train[0]
 
 
 
-```python
+```{code-cell} ipython3
 y_train[0]  # good review
 ```
 
@@ -2341,7 +2341,7 @@ y_train[0]  # good review
 
 
 
-```python
+```{code-cell} ipython3
 text_train[1]
 ```
 
@@ -2353,7 +2353,7 @@ text_train[1]
 
 
 
-```python
+```{code-cell} ipython3
 y_train[1]  # bad review
 ```
 
@@ -2365,7 +2365,7 @@ y_train[1]  # bad review
 
 
 
-```python
+```{code-cell} ipython3
 to_vw_format(str(text_train[1]), 1 if y_train[0] == 1 else -1)
 ```
 
@@ -2379,14 +2379,14 @@ to_vw_format(str(text_train[1]), 1 if y_train[0] == 1 else -1)
 Now, we prepare training (`movie_reviews_train.vw`), validation (`movie_reviews_valid.vw`), and test (`movie_reviews_test.vw`) sets for Vowpal Wabbit. We will use 70% for training, 30% for the hold-out set.
 
 
-```python
+```{code-cell} ipython3
 train_share = int(0.7 * len(text_train))
 train, valid = text_train[:train_share], text_train[train_share:]
 train_labels, valid_labels = y_train[:train_share], y_train[train_share:]
 ```
 
 
-```python
+```{code-cell} ipython3
 len(train_labels), len(valid_labels)
 ```
 
@@ -2398,7 +2398,7 @@ len(train_labels), len(valid_labels)
 
 
 
-```python
+```{code-cell} ipython3
 with open(
     os.path.join(PATH_TO_WRITE_DATA, "movie_reviews_train.vw"), "w"
 ) as vw_train_data:
@@ -2415,7 +2415,7 @@ with open(os.path.join(PATH_TO_WRITE_DATA, "movie_reviews_test.vw"), "w") as vw_
 ```
 
 
-```python
+```{code-cell} ipython3
 !head -2 $PATH_TO_WRITE_DATA/movie_reviews_train.vw
 ```
 
@@ -2424,7 +2424,7 @@ with open(os.path.join(PATH_TO_WRITE_DATA, "movie_reviews_test.vw"), "w") as vw_
 
 
 
-```python
+```{code-cell} ipython3
 !head -2 $PATH_TO_WRITE_DATA/movie_reviews_valid.vw
 ```
 
@@ -2433,7 +2433,7 @@ with open(os.path.join(PATH_TO_WRITE_DATA, "movie_reviews_test.vw"), "w") as vw_
 
 
 
-```python
+```{code-cell} ipython3
 !head -2 $PATH_TO_WRITE_DATA/movie_reviews_test.vw
 ```
 
@@ -2448,7 +2448,7 @@ with open(os.path.join(PATH_TO_WRITE_DATA, "movie_reviews_test.vw"), "w") as vw_
  - `-f` – path to the output file (which can also be in the .vw format)
 
 
-```python
+```{code-cell} ipython3
 !vw -d $PATH_TO_WRITE_DATA/movie_reviews_train.vw --loss_function hinge \
 -f $PATH_TO_WRITE_DATA/movie_reviews_model.vw --quiet
 ```
@@ -2460,7 +2460,7 @@ Next, make the hold-out prediction with the following VW arguments:
  - `-t` - tells VW to ignore labels
 
 
-```python
+```{code-cell} ipython3
 !vw -i $PATH_TO_WRITE_DATA/movie_reviews_model.vw -t \
 -d $PATH_TO_WRITE_DATA/movie_reviews_valid.vw -p $PATH_TO_WRITE_DATA/movie_valid_pred.txt --quiet
 ```
@@ -2468,7 +2468,7 @@ Next, make the hold-out prediction with the following VW arguments:
 Read the predictions from the text file and estimate the accuracy and ROC AUC. Note that VW prints probability estimates of the +1 class. These estimates are distributed from  -1 to 1, so we can convert these into binary answers, assuming that positive values belong to class 1.
 
 
-```python
+```{code-cell} ipython3
 with open(os.path.join(PATH_TO_WRITE_DATA, "movie_valid_pred.txt")) as pred_file:
     valid_prediction = [float(label) for label in pred_file.readlines()]
 print(
@@ -2491,14 +2491,14 @@ print("AUC: {}".format(round(roc_auc_score(valid_labels, valid_prediction), 3)))
 Again, do the same for the test set.
 
 
-```python
+```{code-cell} ipython3
 !vw -i $PATH_TO_WRITE_DATA/movie_reviews_model.vw -t \
 -d $PATH_TO_WRITE_DATA/movie_reviews_test.vw \
 -p $PATH_TO_WRITE_DATA/movie_test_pred.txt --quiet
 ```
 
 
-```python
+```{code-cell} ipython3
 with open(os.path.join(PATH_TO_WRITE_DATA, "movie_test_pred.txt")) as pred_file:
     test_prediction = [float(label) for label in pred_file.readlines()]
 print(
@@ -2521,19 +2521,19 @@ print("AUC: {}".format(round(roc_auc_score(y_test, test_prediction), 3)))
 Let's try to achieve a higher accuracy by incorporating bigrams.
 
 
-```python
+```{code-cell} ipython3
 !vw -d $PATH_TO_WRITE_DATA/movie_reviews_train.vw \
 --loss_function hinge --ngram 2 -f $PATH_TO_WRITE_DATA/movie_reviews_model2.vw --quiet
 ```
 
 
-```python
+```{code-cell} ipython3
 !vw -i$PATH_TO_WRITE_DATA/movie_reviews_model2.vw -t -d $PATH_TO_WRITE_DATA/movie_reviews_valid.vw \
 -p $PATH_TO_WRITE_DATA/movie_valid_pred2.txt --quiet
 ```
 
 
-```python
+```{code-cell} ipython3
 with open(os.path.join(PATH_TO_WRITE_DATA, "movie_valid_pred2.txt")) as pred_file:
     valid_prediction = [float(label) for label in pred_file.readlines()]
 print(
@@ -2554,13 +2554,13 @@ print("AUC: {}".format(round(roc_auc_score(valid_labels, valid_prediction), 3)))
 
 
 
-```python
+```{code-cell} ipython3
 !vw -i $PATH_TO_WRITE_DATA/movie_reviews_model2.vw -t -d $PATH_TO_WRITE_DATA/movie_reviews_test.vw \
 -p $PATH_TO_WRITE_DATA/movie_test_pred2.txt --quiet
 ```
 
 
-```python
+```{code-cell} ipython3
 with open(os.path.join(PATH_TO_WRITE_DATA, "movie_test_pred2.txt")) as pred_file:
     test_prediction2 = [float(label) for label in pred_file.readlines()]
 print(

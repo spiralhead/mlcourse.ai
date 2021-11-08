@@ -12,7 +12,7 @@ Your task is to beat at least 2 benchmarks in this [Kaggle Inclass competition](
 <img src='../../_static/img/xgboost_meme.jpg' width=40% />
 
 
-```python
+```{code-cell} ipython3
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -26,7 +26,7 @@ from xgboost import XGBClassifier
 ```
 
 
-```python
+```{code-cell} ipython3
 # for Jupyter-book, we copy data from GitHub, locally, to save Internet traffic,
 # you can specify the data/ folder from the root of your cloned 
 # https://github.com/Yorko/mlcourse.ai repo, to save Internet traffic
@@ -34,25 +34,25 @@ DATA_PATH = "https://raw.githubusercontent.com/Yorko/mlcourse.ai/master/data/"
 ```
 
 
-```python
+```{code-cell} ipython3
 train = pd.read_csv(DATA_PATH + "flight_delays_train.csv")
 test = pd.read_csv(DATA_PATH + "flight_delays_test.csv")
 ```
 
 
-```python
+```{code-cell} ipython3
 train.head()
 ```
 
 
-```python
+```{code-cell} ipython3
 test.head()
 ```
 
 Given flight departure time, carrier's code, departure airport, destination location, and flight distance, you have to predict departure delay for more than 15 minutes. As the simplest benchmark, let's take Xgboost classifier and two features that are easiest to take: DepTime and Distance. Such model results in 0.68202 on the LB.
 
 
-```python
+```{code-cell} ipython3
 X_train = train[["Distance", "DepTime"]].values
 y_train = train["dep_delayed_15min"].map({"Y": 1, "N": 0}).values
 X_test = test[["Distance", "DepTime"]].values
@@ -65,7 +65,7 @@ X_train_part, X_valid, y_train_part, y_valid = train_test_split(
 We'll train Xgboost with default parameters on part of data and estimate holdout ROC AUC.
 
 
-```python
+```{code-cell} ipython3
 xgb_model = XGBClassifier(seed=17)
 
 xgb_model.fit(X_train_part, y_train_part)
@@ -77,7 +77,7 @@ roc_auc_score(y_valid, xgb_valid_pred)
 Now we do the same with the whole training set, make predictions to test set and form a submission file. This is how you beat the first benchmark. 
 
 
-```python
+```{code-cell} ipython3
 xgb_model.fit(X_train, y_train)
 xgb_test_pred = xgb_model.predict_proba(X_test)[:, 1]
 

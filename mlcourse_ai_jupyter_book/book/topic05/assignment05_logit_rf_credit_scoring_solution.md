@@ -55,7 +55,7 @@ Predict whether the customer will repay their credit within 90 days. This is a b
 Let's set up our environment:
 
 
-```python
+```{code-cell} ipython3
 # Disable warnings in Anaconda
 import warnings
 
@@ -72,7 +72,7 @@ sns.set()
 ```
 
 
-```python
+```{code-cell} ipython3
 from matplotlib import rcParams
 
 rcParams["figure.figsize"] = 11, 8
@@ -81,7 +81,7 @@ rcParams["figure.figsize"] = 11, 8
 Let's write the function that will replace *NaN* values with the median for each column.
 
 
-```python
+```{code-cell} ipython3
 def fill_nan(table):
     for col in table.columns:
         table[col] = table[col].fillna(table[col].median())
@@ -91,7 +91,7 @@ def fill_nan(table):
 Now, read the data:
 
 
-```python
+```{code-cell} ipython3
 # for Jupyter-book, we copy data from GitHub, locally, to save Internet traffic,
 # you can specify the data/ folder from the root of your cloned 
 # https://github.com/Yorko/mlcourse.ai repo, to save Internet traffic
@@ -99,7 +99,7 @@ DATA_PATH = "https://raw.githubusercontent.com/Yorko/mlcourse.ai/master/data/"
 ```
 
 
-```python
+```{code-cell} ipython3
 data = pd.read_csv(DATA_PATH + "credit_scoring_sample.csv", sep=";")
 data.head()
 ```
@@ -107,14 +107,14 @@ data.head()
 Look at the variable types:
 
 
-```python
+```{code-cell} ipython3
 data.dtypes
 ```
 
 Check the class balance:
 
 
-```python
+```{code-cell} ipython3
 ax = data["SeriousDlqin2yrs"].hist(orientation="horizontal", color="red")
 ax.set_xlabel("number_of_observations")
 ax.set_ylabel("unique_value")
@@ -127,7 +127,7 @@ data["SeriousDlqin2yrs"].value_counts() / data.shape[0]
 Separate the input variable names by excluding the target:
 
 
-```python
+```{code-cell} ipython3
 independent_columns_names = [x for x in data if x != "SeriousDlqin2yrs"]
 independent_columns_names
 ```
@@ -135,14 +135,14 @@ independent_columns_names
 Apply the function to replace *NaN* values:
 
 
-```python
+```{code-cell} ipython3
 table = fill_nan(data)
 ```
 
 Separate the target variable and input features:
 
 
-```python
+```{code-cell} ipython3
 X = table[independent_columns_names]
 y = table["SeriousDlqin2yrs"]
 ```
@@ -161,7 +161,7 @@ y = table["SeriousDlqin2yrs"]
 **Solution:**
 
 
-```python
+```{code-cell} ipython3
 def get_bootstrap_samples(data, n_samples):
     """Generate samples using bootstrapping."""
     indices = np.random.randint(0, len(data), (n_samples, len(data)))
@@ -193,7 +193,7 @@ print("Mean interval", stat_intervals(churn_mean_scores, 0.1))
 Let's set up to use logistic regression:
 
 
-```python
+```{code-cell} ipython3
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 ```
@@ -201,21 +201,21 @@ from sklearn.model_selection import GridSearchCV, StratifiedKFold
 Now, we will create a LogisticRegression model and use class_weight='balanced' to make up for our unbalanced classes.
 
 
-```python
+```{code-cell} ipython3
 lr = LogisticRegression(random_state=5, class_weight="balanced")
 ```
 
 Let's try to find the best regularization coefficient, which is the coefficient `C` for logistic regression. Then, we will have an optimal model that is not overfit and is a good predictor of the target variable.
 
 
-```python
+```{code-cell} ipython3
 parameters = {"C": (0.0001, 0.001, 0.01, 0.1, 1, 10)}
 ```
 
 In order to find the optimal value of `C`, let's apply stratified 5-fold validation and look at the *ROC AUC* against different values of the parameter `C`. Use the `StratifiedKFold` function for this: 
 
 
-```python
+```{code-cell} ipython3
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=5)
 ```
 
@@ -235,7 +235,7 @@ One of the important metrics of model quality is the *Area Under the Curve (AUC)
 **Solution:**
 
 
-```python
+```{code-cell} ipython3
 grid_search = GridSearchCV(lr, parameters, n_jobs=-1, scoring="roc_auc", cv=skf)
 grid_search = grid_search.fit(X, y)
 grid_search.best_estimator_
@@ -251,14 +251,14 @@ grid_search.best_estimator_
 **Solution:**
 
 
-```python
+```{code-cell} ipython3
 grid_search.cv_results_["std_test_score"][1]
 ```
 
 The *ROC AUC* value of the best model:
 
 
-```python
+```{code-cell} ipython3
 grid_search.best_score_
 ```
 
@@ -279,7 +279,7 @@ grid_search.best_score_
 **Solution:**
 
 
-```python
+```{code-cell} ipython3
 from sklearn.preprocessing import StandardScaler
 
 lr = LogisticRegression(C=0.001, random_state=5, class_weight="balanced")
@@ -303,7 +303,7 @@ pd.DataFrame(
 **Solution:**
 
 
-```python
+```{code-cell} ipython3
 print((np.exp(lr.coef_[0]) / np.sum(np.exp(lr.coef_[0])))[2])
 ```
 
@@ -319,7 +319,7 @@ print((np.exp(lr.coef_[0]) / np.sum(np.exp(lr.coef_[0])))[2])
 **Solution:**
 
 
-```python
+```{code-cell} ipython3
 lr = LogisticRegression(C=0.001, random_state=5, class_weight="balanced")
 lr.fit(X, y)
 
@@ -329,7 +329,7 @@ pd.DataFrame(
 ```
 
 
-```python
+```{code-cell} ipython3
 np.exp(lr.coef_[0][0] * 20)
 ```
 
@@ -340,14 +340,14 @@ It is $\exp^{\beta\delta}$ times more likely that the customer won't repay the d
 Import the Random Forest classifier:
 
 
-```python
+```{code-cell} ipython3
 from sklearn.ensemble import RandomForestClassifier
 ```
 
 Initialize Random Forest with 100 trees and balance target classes:
 
 
-```python
+```{code-cell} ipython3
 rf = RandomForestClassifier(
     n_estimators=100, n_jobs=-1, random_state=42, class_weight="balanced"
 )
@@ -356,7 +356,7 @@ rf = RandomForestClassifier(
 We will search for the best parameters among the following values:
 
 
-```python
+```{code-cell} ipython3
 parameters = {
     "max_features": [1, 2, 4],
     "min_samples_leaf": [3, 5, 7, 9],
@@ -378,7 +378,7 @@ Also, we will use the stratified k-fold validation again. You should still have 
 **Solution:**
 
 
-```python
+```{code-cell} ipython3
 %%time
 rf_grid_search = GridSearchCV(
     rf, parameters, n_jobs=-1, scoring="roc_auc", cv=skf, verbose=True
@@ -402,7 +402,7 @@ print(rf_grid_search.best_score_ - grid_search.best_score_)
 **Solution:**
 
 
-```python
+```{code-cell} ipython3
 independent_columns_names[
     np.argmin(rf_grid_search.best_estimator_.feature_importances_)
 ]
@@ -411,7 +411,7 @@ independent_columns_names[
 Rating of the feature importance:
 
 
-```python
+```{code-cell} ipython3
 pd.DataFrame(
     {
         "feat": independent_columns_names,
@@ -440,7 +440,7 @@ On the other hand, the main advantage of Logistic Regression is that we can inte
 Import modules and set up the parameters for bagging:
 
 
-```python
+```{code-cell} ipython3
 from sklearn.ensemble import BaggingClassifier
 from sklearn.model_selection import RandomizedSearchCV, cross_val_score
 
@@ -465,7 +465,7 @@ parameters = {
 _(the following code is commented out for the Jupyter-book version as it takes ~16 min. to run, a bit too long for CI/CD)_
 
 
-```python
+```{code-cell} ipython3
 # bg = BaggingClassifier(
 #     LogisticRegression(class_weight="balanced"),
 #     n_estimators=100,
@@ -486,7 +486,7 @@ _(the following code is commented out for the Jupyter-book version as it takes ~
 ```
 
 
-```python
+```{code-cell} ipython3
 # r_grid_search.best_score_
 # 0.8076172570918905
 ```

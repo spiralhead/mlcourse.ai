@@ -1,9 +1,24 @@
+---
+jupytext:
+  formats: md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python3
+---
+
+(topic3)=
+
+# Topic 3. Classification, Decision Trees and k Nearest Neighbors
+
+
 <img src="https://habrastorage.org/webt/ia/m9/zk/iam9zkyzqebnf_okxipihkgjwnw.jpeg" />
     
 **<center>[mlcourse.ai](https://mlcourse.ai) – Open Machine Learning Course** </center><br>
 Author: [Yury Kashnitsky](https://yorko.github.io). Translated and edited by [Christina Butsko](https://www.linkedin.com/in/christinabutsko/), Gleb Filatov, and [Yuanyuan Pao](https://www.linkedin.com/in/yuanyuanpao/). This material is subject to the terms and conditions of the [Creative Commons CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) license. Free use is permitted for any non-commercial purpose.
-
-# <center>Topic 3. Classification, Decision Trees and k Nearest Neighbors
 
 ## Article outline
 
@@ -103,7 +118,7 @@ We can make sure that the tree built in the previous example is optimal: it took
  
 At the heart of the popular algorithms for decision tree construction, such as ID3 or C4.5, lies the principle of greedy maximization of information gain: at each step, the algorithm chooses the variable that gives the greatest information gain upon splitting. Then the procedure is repeated recursively until the entropy is zero (or some small value to account for overfitting). Different algorithms use different heuristics for "early stopping" or "cut-off" to avoid constructing an overfitted tree. 
 
-```python
+```{code-cell} ipython3
 def build(L):
     create node t
     if the stopping criterion is True:
@@ -135,7 +150,7 @@ where ($p_+$ is the probability of an object having a label +).
 If we plot these two functions against the argument $p_+$, we will see that the entropy plot is very close to the plot of Gini uncertainty, doubled. Therefore, in practice, these two criteria are almost identical.
 
 
-```python
+```{code-cell} ipython3
 # we don't like warnings
 # you can comment the following 2 lines if you'd like to
 import warnings
@@ -152,7 +167,7 @@ from matplotlib import pyplot as plt
 ```
 
 
-```python
+```{code-cell} ipython3
 plt.figure(figsize=(6, 4))
 xx = np.linspace(0, 1, 50)
 plt.plot(xx, [2 * x * (1 - x) for x in xx], label="gini")
@@ -170,7 +185,7 @@ plt.legend();
 Let's consider fitting a decision tree to some synthetic data. We will generate samples from two classes, both normal distributions but with different means.
 
 
-```python
+```{code-cell} ipython3
 # first class
 np.random.seed(17)
 train_data = np.random.normal(size=(100, 2))
@@ -184,7 +199,7 @@ train_labels = np.r_[train_labels, np.ones(100)]
 Let's plot the data. Informally, the classification problem in this case is to build some "good" boundary separating the two classes (the red dots from the yellow). Machine learning for this case boils down to choosing a good separating border. A straight line will be too simple while some complex curve snaking by each red dot will be too complex and will lead us to making mistakes on new samples. Intuitively, some smooth boundary, or at least a straight line or a hyperplane, would work well on new data.
 
 
-```python
+```{code-cell} ipython3
 plt.figure(figsize=(10, 8))
 plt.scatter(
     train_data[:, 0],
@@ -201,7 +216,7 @@ plt.plot(range(-2, 5), range(4, -3, -1));
 Let's try to separate these two classes by training an `Sklearn` decision tree. We will use `max_depth` parameter that limits the depth of the tree. Let's visualize the resulting separating boundary.
 
 
-```python
+```{code-cell} ipython3
 from sklearn.tree import DecisionTreeClassifier
 
 
@@ -235,7 +250,7 @@ plt.scatter(
 And how does the tree itself look? We see that the tree "cuts" the space into 8 rectangles, i.e. the tree has 8 leaves. Within each rectangle, the tree will make the prediction according to the majority label of the objects inside it.
 
 
-```python
+```{code-cell} ipython3
 import pydotplus  # pip install pydotplus
 from sklearn.tree import export_graphviz
 
@@ -249,7 +264,7 @@ def tree_graph_to_png(tree, feature_names, png_file_to_save):
 ```
 
 
-```python
+```{code-cell} ipython3
 tree_graph_to_png(
     tree=clf_tree,
     feature_names=["x1", "x2"],
@@ -270,7 +285,7 @@ Suppose we have a numeric feature "Age" that has a lot of unique values. A decis
 Let's consider an example. Suppose we have the following dataset:
 
 
-```python
+```{code-cell} ipython3
 data = pd.DataFrame(
     {
         "Age": [17, 64, 18, 20, 38, 49, 55, 25, 29, 31, 33],
@@ -283,12 +298,12 @@ data
 Let's sort it by age in ascending order.
 
 
-```python
+```{code-cell} ipython3
 data.sort_values("Age")
 ```
 
 
-```python
+```{code-cell} ipython3
 age_tree = DecisionTreeClassifier(random_state=17)
 age_tree.fit(data["Age"].values.reshape(-1, 1), data["Loan Default"].values)
 
@@ -308,7 +323,7 @@ Given this information, why do you think it makes no sense here to consider a fe
 Let's consider a more complex example by adding the "Salary" variable (in the thousands of dollars per year).
 
 
-```python
+```{code-cell} ipython3
 data2 = pd.DataFrame(
     {
         "Age": [17, 64, 18, 20, 38, 49, 55, 25, 29, 31, 33],
@@ -324,18 +339,18 @@ If we sort by age, the target class ( "loan default") switches (from 1 to 0 or v
 
 
 
-```python
+```{code-cell} ipython3
 data2.sort_values("Age")
 ```
 
 
-```python
+```{code-cell} ipython3
 age_sal_tree = DecisionTreeClassifier(random_state=17)
 age_sal_tree.fit(data2[["Age", "Salary"]].values, data2["Loan Default"].values);
 ```
 
 
-```python
+```{code-cell} ipython3
 tree_graph_to_png(
     tree=age_sal_tree,
     feature_names=["Age", "Salary"],
@@ -397,7 +412,7 @@ where $\ell$ is the number of samples in a leaf, $y_i$ is the value of the targe
 Let's generate some data distributed by the function $f(x) = e^{-x ^ 2} + 1.5 * e^{-(x - 2) ^ 2}$ with some noise. Then we will train a tree with this data and predictions that the tree makes.
 
 
-```python
+```{code-cell} ipython3
 n_train = 150
 n_test = 1000
 noise = 0.1
@@ -508,7 +523,7 @@ Let's read data into a `DataFrame` and preprocess it. Store *State* in a separat
  train the first model without the *State* feature, and then we will see if it helps. 
 
 
-```python
+```{code-cell} ipython3
 # for Jupyter-book, we copy data from GitHub, locally, to save Internet traffic,
 # you can specify the data/ folder from the root of your cloned 
 # https://github.com/Yorko/mlcourse.ai repo, to save Internet traffic
@@ -516,7 +531,7 @@ DATA_PATH = "https://raw.githubusercontent.com/Yorko/mlcourse.ai/master/data/"
 ```
 
 
-```python
+```{code-cell} ipython3
 df = pd.read_csv(DATA_PATH + "telecom_churn.csv")
 
 df["International plan"] = pd.factorize(df["International plan"])[0]
@@ -528,14 +543,14 @@ df.drop(["State", "Churn"], axis=1, inplace=True)
 ```
 
 
-```python
+```{code-cell} ipython3
 df.head()
 ```
 
 Let's allocate 70% of the set for training (`X_train`, `y_train`) and 30% for the hold-out set (`X_holdout`, `y_holdout`). The hold-out set will not be involved in tuning the parameters of the models. We'll use it at the end, after tuning, to assess the quality of the resulting model. Let's train 2 models: decision tree and k-NN. We do not know what parameters are good, so we will assume some random ones: a tree depth of 5 and the number of nearest neighbors equal 10.
 
 
-```python
+```{code-cell} ipython3
 from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
@@ -559,7 +574,7 @@ knn.fit(X_train_scaled, y_train);
 Let's assess prediction quality on our hold-out set with a simple metric, the proportion of correct answers (accuracy). The decision tree did better: the percentage of correct answers is about 94% (decision tree) versus 88% (k-NN). Note that this performance is achieved by using random parameters.
 
 
-```python
+```{code-cell} ipython3
 from sklearn.metrics import accuracy_score
 
 tree_pred = tree.predict(X_holdout)
@@ -567,7 +582,7 @@ accuracy_score(y_holdout, tree_pred)  # 0.94
 ```
 
 
-```python
+```{code-cell} ipython3
 knn_pred = knn.predict(X_holdout_scaled)
 accuracy_score(y_holdout, knn_pred)  # 0.89
 ```
@@ -575,7 +590,7 @@ accuracy_score(y_holdout, knn_pred)  # 0.89
 Now, let's identify the parameters for the tree using cross-validation. We'll tune the maximum depth and the maximum number of features used at each split. Here is the essence of how the GridSearchCV works: for each unique pair of values of `max_depth` and `max_features`, compute model performance with 5-fold cross-validation, and then select the best combination of parameters.
 
 
-```python
+```{code-cell} ipython3
 from sklearn.model_selection import GridSearchCV, cross_val_score
 
 tree_params = {"max_depth": range(1, 11), "max_features": range(4, 19)}
@@ -588,24 +603,24 @@ tree_grid.fit(X_train, y_train)
 Let's list the best parameters and the corresponding mean accuracy from cross-validation.
 
 
-```python
+```{code-cell} ipython3
 tree_grid.best_params_  # {'max_depth': 6, 'max_features': 17}
 ```
 
 
-```python
+```{code-cell} ipython3
 tree_grid.best_score_  # 0.94256322331761677
 ```
 
 
-```python
+```{code-cell} ipython3
 accuracy_score(y_holdout, tree_grid.predict(X_holdout))  # 0.946
 ```
 
 Let's draw the resulting tree. Due to the fact that it is not entirely a toy example (its maximum depth is 6), the picture is not that small, but you can "walk" over the tree if you click on the picture.
 
 
-```python
+```{code-cell} ipython3
 tree_graph_to_png(
     tree=tree_grid.best_estimator_,
     feature_names=df.columns,
@@ -618,7 +633,7 @@ tree_graph_to_png(
 Now, let's tune the number of neighbors $k$ for k-NN:
 
 
-```python
+```{code-cell} ipython3
 from sklearn.pipeline import Pipeline
 
 knn_pipe = Pipeline(
@@ -635,14 +650,14 @@ knn_grid.best_params_, knn_grid.best_score_
 ```
 
 
-```python
+```{code-cell} ipython3
 accuracy_score(y_holdout, knn_grid.predict(X_holdout))  # 0.89
 ```
 
 Here, the tree proved to be better than the nearest neighbors algorithm: 94.2%/94.6% accuracy for cross-validation and hold-out respectively. Decision trees perform very well, and even random forest (let's think of it for now as a bunch of trees that work better together) in this example cannot achieve much better performance (95.1%/95.3%) despite being trained for much longer. 
 
 
-```python
+```{code-cell} ipython3
 from sklearn.ensemble import RandomForestClassifier
 
 forest = RandomForestClassifier(n_estimators=100, n_jobs=-1, random_state=17)
@@ -650,7 +665,7 @@ print(np.mean(cross_val_score(forest, X_train, y_train, cv=5)))  # 0.949
 ```
 
 
-```python
+```{code-cell} ipython3
 forest_params = {"max_depth": range(6, 12), "max_features": range(4, 19)}
 
 forest_grid = GridSearchCV(forest, forest_params, cv=5, n_jobs=-1, verbose=True)
@@ -661,7 +676,7 @@ forest_grid.best_params_, forest_grid.best_score_  # ({'max_depth': 9, 'max_feat
 ```
 
 
-```python
+```{code-cell} ipython3
 accuracy_score(y_holdout, forest_grid.predict(X_holdout))  # 0.953
 ```
 
@@ -670,7 +685,7 @@ accuracy_score(y_holdout, forest_grid.predict(X_holdout))  # 0.953
 To continue the discussion of the pros and cons of the methods in question, let's consider a simple classification task, where a tree would perform well but does it in an "overly complicated" manner. Let's create a set of points on a plane (2 features), each point will be one of two classes (+1 for red, or -1 for yellow). If you look at it as a classification problem, it seems very simple: the classes are separated by a line. 
 
 
-```python
+```{code-cell} ipython3
 def form_linearly_separable_data(n=500, x1_min=0, x1_max=30, x2_min=0, x2_max=30):
     data, target = [], []
     for i in range(n):
@@ -690,7 +705,7 @@ plt.scatter(X[:, 0], X[:, 1], c=y, cmap="autumn", edgecolors="black");
 However, the border that the decision tree builds is too complicated; plus the tree itself is very deep. Also, imagine how badly the tree will generalize to the space beyond the $30 \times 30$ squares that frame the training set.
 
 
-```python
+```{code-cell} ipython3
 tree = DecisionTreeClassifier(random_state=17).fit(X, y)
 
 xx, yy = get_grid(X)
@@ -705,7 +720,7 @@ plt.title("Easy task. Decision tree compexifies everything");
 We got this overly complex construction, although the solution is just a straight line $x_1 = x_2$.
 
 
-```python
+```{code-cell} ipython3
 tree_graph_to_png(
     tree=tree,
     feature_names=["x1", "x2"],
@@ -718,7 +733,7 @@ tree_graph_to_png(
 The method of one nearest neighbor does better than the tree but is still not as good as a linear classifier (our next topic).
 
 
-```python
+```{code-cell} ipython3
 knn = KNeighborsClassifier(n_neighbors=1).fit(X, y)
 
 xx, yy = get_grid(X)
@@ -739,7 +754,7 @@ Pictures here are 8x8 matrices (intensity of white color for each pixel). Then e
 Let's draw some handwritten digits. We see that they are distinguishable.
 
 
-```python
+```{code-cell} ipython3
 from sklearn.datasets import load_digits
 
 data = load_digits()
@@ -749,7 +764,7 @@ X[0, :].reshape([8, 8])
 ```
 
 
-```python
+```{code-cell} ipython3
 f, axes = plt.subplots(1, 4, sharey=True, figsize=(16, 6))
 for i in range(4):
     axes[i].imshow(X[i, :].reshape([8, 8]), cmap="Greys");
@@ -760,7 +775,7 @@ Next, let's do the same experiment as in the previous task, but, this time, let'
 Let’s select 70% of the dataset for training (`X_train`, `y_train`) and 30% for holdout (`X_holdout`, `y_holdout`). The holdout set will not participate in model parameters tuning; we will use it at the end to check the quality of the resulting model.
 
 
-```python
+```{code-cell} ipython3
 X_train, X_holdout, y_train, y_holdout = train_test_split(
     X, y, test_size=0.3, random_state=17
 )
@@ -769,7 +784,7 @@ X_train, X_holdout, y_train, y_holdout = train_test_split(
 Let’s train a decision tree and k-NN with our random parameters.
 
 
-```python
+```{code-cell} ipython3
 tree = DecisionTreeClassifier(max_depth=5, random_state=17)
 knn_pipe = Pipeline(
     [("scaler", StandardScaler()), ("knn", KNeighborsClassifier(n_neighbors=10))]
@@ -782,7 +797,7 @@ knn_pipe.fit(X_train, y_train);
 Now let’s make predictions on our holdout set. We can see that k-NN did much better, but note that this is with random parameters.  
 
 
-```python
+```{code-cell} ipython3
 tree_pred = tree.predict(X_holdout)
 knn_pred = knn_pipe.predict(X_holdout)
 accuracy_score(y_holdout, knn_pred), accuracy_score(
@@ -793,7 +808,7 @@ accuracy_score(y_holdout, knn_pred), accuracy_score(
 Now let’s tune our model parameters using cross-validation as before, but now we’ll take into account that we have more features than in the previous task: 64. 
 
 
-```python
+```{code-cell} ipython3
 tree_params = {
     "max_depth": [1, 2, 3, 5, 10, 20, 25, 30, 40, 50, 64],
     "max_features": [1, 2, 3, 5, 10, 20, 30, 50, 64],
@@ -810,14 +825,14 @@ Let's see the best parameters combination and the corresponding accuracy from cr
 
 
 
-```python
+```{code-cell} ipython3
 tree_grid.best_params_, tree_grid.best_score_  # ({'max_depth': 20, 'max_features': 64}, 0.844)
 ```
 
 That has already passed 66% but not quite 97%. kNN works better on this dataset. In the case of one nearest neighbour, we were able to reach 99% guesses on cross-validation.  
 
 
-```python
+```{code-cell} ipython3
 np.mean(
     cross_val_score(KNeighborsClassifier(n_neighbors=1), X_train, y_train, cv=5)
 )  # 0.987
@@ -826,7 +841,7 @@ np.mean(
 Let’s train a random forest on the same dataset, it works better than kNN on the majority of datasets. But here we have an exception. 
 
 
-```python
+```{code-cell} ipython3
 np.mean(
     cross_val_score(RandomForestClassifier(random_state=17), X_train, y_train, cv=5)
 )  # 0.935
@@ -850,7 +865,7 @@ Let's consider another simple example. In the classification problem, one of the
 
 
 
-```python
+```{code-cell} ipython3
 def form_noisy_data(n_obj=1000, n_feat=100, random_seed=17):
     np.seed = random_seed
     y = np.random.choice([-1, 1], size=n_obj)
@@ -873,7 +888,7 @@ As always, we will look at the accuracy for cross-validation and the hold-out se
 One can see that k-NN with the Euclidean distance does not work well on the problem, even when you vary the number of nearest neighbors over a wide range. In contrast, the decision tree easily "detects" hidden dependencies in the data despite a restriction on the maximum depth.
 
 
-```python
+```{code-cell} ipython3
 X_train, X_holdout, y_train, y_holdout = train_test_split(
     X, y, test_size=0.3, random_state=17
 )
@@ -899,7 +914,7 @@ plt.legend();
 ```
 
 
-```python
+```{code-cell} ipython3
 tree = DecisionTreeClassifier(random_state=17, max_depth=1)
 tree_cv_score = np.mean(cross_val_score(tree, X_train, y_train, cv=5))
 tree.fit(X_train, y_train)

@@ -46,7 +46,7 @@ Therefore, the data is organized by relatively deterministic timestamps, and may
 Let's import some libraries. First, we will need the [statsmodels](http://statsmodels.sourceforge.net/stable/) library, which has many statistical modeling functions, including time series. For R afficionados who had to move to Python, `statsmodels` will definitely look more familiar since it supports model definitions like 'Wage ~ Age + Education'.
 
 
-```python
+```{code-cell} ipython3
 import matplotlib.pyplot as plt  # plots
 import numpy as np  # vectors and matrices
 import pandas as pd  # tables and data manipulations
@@ -75,7 +75,7 @@ warnings.filterwarnings("ignore") # `do not disturbe` mode
 As an example, let's look at real mobile game data. Specifically, we will look into ads watched per hour and in-game currency spend per day:
 
 
-```python
+```{code-cell} ipython3
 # for Jupyter-book, we copy data from GitHub, locally, to save Internet traffic,
 # you can specify the data/ folder from the root of your cloned 
 # https://github.com/Yorko/mlcourse.ai repo, to save Internet traffic
@@ -83,7 +83,7 @@ DATA_PATH = "https://raw.githubusercontent.com/Yorko/mlcourse.ai/master/data/"
 ```
 
 
-```python
+```{code-cell} ipython3
 ads = pd.read_csv(DATA_PATH + "ads.csv", index_col=["Time"], parse_dates=["Time"])
 currency = pd.read_csv(
     DATA_PATH + "currency.csv", index_col=["Time"], parse_dates=["Time"]
@@ -91,7 +91,7 @@ currency = pd.read_csv(
 ```
 
 
-```python
+```{code-cell} ipython3
 plt.figure(figsize=(12, 6))
 plt.plot(ads.Ads)
 plt.title("Ads watched (hourly data)")
@@ -100,7 +100,7 @@ plt.show()
 ```
 
 
-```python
+```{code-cell} ipython3
 plt.figure(figsize=(15, 7))
 plt.plot(currency.GEMS_GEMS_SPENT)
 plt.title("In-game currency spent (daily data)")
@@ -116,7 +116,7 @@ Before we begin forecasting, let's understand how to measure the quality of our 
 
 $R^2 = 1 - \frac{SS_{res}}{SS_{tot}}$ 
 
-```python
+```{code-cell} ipython3
 sklearn.metrics.r2_score
 ```
 ---
@@ -124,7 +124,7 @@ sklearn.metrics.r2_score
 
 $MAE = \frac{\sum\limits_{i=1}^{n} |y_i - \hat{y}_i|}{n}$ 
 
-```python
+```{code-cell} ipython3
 sklearn.metrics.mean_absolute_error
 ```
 ---
@@ -132,7 +132,7 @@ sklearn.metrics.mean_absolute_error
 
 $MedAE = median(|y_1 - \hat{y}_1|, ... , |y_n - \hat{y}_n|)$
 
-```python
+```{code-cell} ipython3
 sklearn.metrics.median_absolute_error
 ```
 ---
@@ -140,7 +140,7 @@ sklearn.metrics.median_absolute_error
 
 $MSE = \frac{1}{n}\sum\limits_{i=1}^{n} (y_i - \hat{y}_i)^2$
 
-```python
+```{code-cell} ipython3
 sklearn.metrics.mean_squared_error
 ```
 ---
@@ -148,7 +148,7 @@ sklearn.metrics.mean_squared_error
 
 $MSLE = \frac{1}{n}\sum\limits_{i=1}^{n} (log(1+y_i) - log(1+\hat{y}_i))^2$
 
-```python
+```{code-cell} ipython3
 sklearn.metrics.mean_squared_log_error
 ```
 ---
@@ -156,13 +156,13 @@ sklearn.metrics.mean_squared_log_error
 
 $MAPE = \frac{100}{n}\sum\limits_{i=1}^{n} \frac{|y_i - \hat{y}_i|}{y_i}$ 
 
-```python
+```{code-cell} ipython3
 def mean_absolute_percentage_error(y_true, y_pred): 
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 ```
 
 
-```python
+```{code-cell} ipython3
 # Importing everything from above
 
 from sklearn.metrics import (mean_absolute_error, mean_squared_error,
@@ -183,7 +183,7 @@ Let's start with a naive hypothesis: "tomorrow will be the same as today". Howev
 $\hat{y}_{t} = \frac{1}{k} \displaystyle\sum^{k}_{n=1} y_{t-n}$
 
 
-```python
+```{code-cell} ipython3
 def moving_average(series, n):
     """
         Calculate average of last n observations
@@ -197,7 +197,7 @@ moving_average(ads, 24)  # prediction for the last observed day (past 24 hours)
 Unfortunately, we cannot make predictions far in the future - in order to get the value for the next step, we need the previous values to be actually observed. But moving average has another use case - smoothing the original time series to identify trends. Pandas has an implementation available with [`DataFrame.rolling(window).mean()`](http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.rolling.html). The wider the window, the smoother the trend. In the case of very noisy data, which is often encountered in finance, this procedure can help detect common patterns.
 
 
-```python
+```{code-cell} ipython3
 def plotMovingAverage(
     series, window, plot_intervals=False, scale=1.96, plot_anomalies=False
 ):
@@ -239,21 +239,21 @@ def plotMovingAverage(
 Let's smooth by the previous 4 hours.
 
 
-```python
+```{code-cell} ipython3
 plotMovingAverage(ads, 4)
 ```
 
 Now let's try smoothing by the previous 12 hours.
 
 
-```python
+```{code-cell} ipython3
 plotMovingAverage(ads, 12)
 ```
 
 Now smoothing with the previous 24 hours, we get the daily trend.
 
 
-```python
+```{code-cell} ipython3
 plotMovingAverage(ads, 24)
 ```
 
@@ -262,14 +262,14 @@ When we applied daily smoothing on hourly data, we could clearly see the dynamic
 We can also plot confidence intervals for our smoothed values.
 
 
-```python
+```{code-cell} ipython3
 plotMovingAverage(ads, 4, plot_intervals=True)
 ```
 
 Now, let's create a simple anomaly detection system with the help of moving average. Unfortunately, in this particular dataset, everything is more or less normal, so we will intentionally make one of the values abnormal in our dataframe `ads_anomaly`.
 
 
-```python
+```{code-cell} ipython3
 ads_anomaly = ads.copy()
 ads_anomaly.iloc[-20] = ads_anomaly.iloc[-20] * 0.2  # say we have 80% drop of ads
 ```
@@ -277,14 +277,14 @@ ads_anomaly.iloc[-20] = ads_anomaly.iloc[-20] * 0.2  # say we have 80% drop of a
 Let's see if this simple method can catch the anomaly.
 
 
-```python
+```{code-cell} ipython3
 plotMovingAverage(ads_anomaly, 4, plot_intervals=True, plot_anomalies=True)
 ```
 
 Neat! What about the second series?
 
 
-```python
+```{code-cell} ipython3
 plotMovingAverage(
     currency, 7, plot_intervals=True, plot_anomalies=True
 )  # weekly smoothing
@@ -298,7 +298,7 @@ Oh no, this was not as great! Here, we can see the downside of our simple approa
 $\hat{y}_{t} = \displaystyle\sum^{k}_{n=1} \omega_n y_{t+1-n}$
 
 
-```python
+```{code-cell} ipython3
 def weighted_average(series, weights):
     """
         Calculate weighted average on the series.
@@ -312,12 +312,12 @@ def weighted_average(series, weights):
 ```
 
 
-```python
+```{code-cell} ipython3
 weighted_average(ads, [0.6, 0.3, 0.1])
 ```
 
 
-```python
+```{code-cell} ipython3
 # just checking
 0.6 * ads.iloc[-1] + 0.3 * ads.iloc[-2] + 0.1 * ads.iloc[-3]
 ```
@@ -333,7 +333,7 @@ Here the model value is a weighted average between the current true value and th
 Exponentiality is hidden in the recursiveness of the function – we multiply by $(1-\alpha)$ each time, which already contains a multiplication by $(1-\alpha)$ of previous model values.
 
 
-```python
+```{code-cell} ipython3
 def exponential_smoothing(series, alpha):
     """
         series - dataset with timestamps
@@ -346,7 +346,7 @@ def exponential_smoothing(series, alpha):
 ```
 
 
-```python
+```{code-cell} ipython3
 def plotExponentialSmoothing(series, alphas):
     """
         Plots exponential smoothing with different alphas
@@ -369,12 +369,12 @@ def plotExponentialSmoothing(series, alphas):
 ```
 
 
-```python
+```{code-cell} ipython3
 plotExponentialSmoothing(ads.Ads, [0.3, 0.05])
 ```
 
 
-```python
+```{code-cell} ipython3
 plotExponentialSmoothing(currency.GEMS_GEMS_SPENT, [0.3, 0.05])
 ```
 
@@ -393,7 +393,7 @@ $$\hat{y}_{x+1} = \ell_x + b_x$$
 The first one describes the intercept, which, as before, depends on the current value of the series. The second term is now split into previous values of the level and of the trend. The second function describes the trend, which depends on the level changes at the current step and on the previous value of the trend. In this case, the $\beta$ coefficient is a weight for exponential smoothing. The final prediction is the sum of the model values of the intercept and trend.
 
 
-```python
+```{code-cell} ipython3
 def double_exponential_smoothing(series, alpha, beta):
     """
         series - dataset with timeseries
@@ -440,12 +440,12 @@ def plotDoubleExponentialSmoothing(series, alphas, betas):
 ```
 
 
-```python
+```{code-cell} ipython3
 plotDoubleExponentialSmoothing(ads.Ads, alphas=[0.9, 0.02], betas=[0.9, 0.02])
 ```
 
 
-```python
+```{code-cell} ipython3
 plotDoubleExponentialSmoothing(
     currency.GEMS_GEMS_SPENT, alphas=[0.9, 0.02], betas=[0.9, 0.02]
 )
@@ -482,7 +482,7 @@ $$d_t=\gamma∣y_t−\hat y_t∣+(1−\gamma)d_{t−T},$$
 where $T$ is the length of the season, $d$ is the predicted deviation. Other parameters were taken from triple exponential smoothing. You can read more about the method and its applicability to anomaly detection in time series [here](http://fedcsis.org/proceedings/2012/pliks/118.pdf).
 
 
-```python
+```{code-cell} ipython3
 class HoltWinters:
 
     """
@@ -617,7 +617,7 @@ The idea is rather simple -- we train our model on a small segment of the time s
 Now, knowing how to set up cross-validation, we can find the optimal parameters for the Holt-Winters model. Recall that we have daily seasonality in ads, hence the `slen=24` parameter.
 
 
-```python
+```{code-cell} ipython3
 from sklearn.model_selection import \
     TimeSeriesSplit  # you have everything done for you
 
@@ -663,7 +663,7 @@ def timeseriesCVscore(params, series, loss_function=mean_squared_error, slen=24)
 In the Holt-Winters model, as well as in the other models of exponential smoothing, there's a constraint on how large the smoothing parameters can be, each of them ranging from 0 to 1. Therefore, in order to minimize our loss function, we have to choose an algorithm that supports constraints on model parameters. In our case, we will use the truncated Newton conjugate gradient.
 
 
-```python
+```{code-cell} ipython3
 %%time
 data = ads.Ads[:-20]  # leave some data for testing
 
@@ -699,7 +699,7 @@ model.triple_exponential_smoothing()
 Let's add some code to render plots.
 
 
-```python
+```{code-cell} ipython3
 def plotHoltWinters(series, plot_intervals=False, plot_anomalies=False):
     """
         series - dataset with timeseries
@@ -747,19 +747,19 @@ def plotHoltWinters(series, plot_intervals=False, plot_anomalies=False):
 ```
 
 
-```python
+```{code-cell} ipython3
 plotHoltWinters(ads.Ads)
 ```
 
 
-```python
+```{code-cell} ipython3
 plotHoltWinters(ads.Ads, plot_intervals=True, plot_anomalies=True)
 ```
 
 Judging by the plots, our model was able to successfully approximate the initial time series, capturing the daily seasonality, overall downwards trend, and even some anomalies. If you look at the model deviations, you can clearly see that the model reacts quite sharply to changes in the structure of the series but then quickly returns the deviation to the normal values, essentially "forgetting" the past. This feature of the model allows us to quickly build anomaly detection systems, even for noisy series data, without spending too much time and money on preparing the data and training the model.
 
 
-```python
+```{code-cell} ipython3
 plt.figure(figsize=(25, 5))
 plt.plot(model.PredictedDeviation)
 plt.grid(True)
@@ -770,7 +770,7 @@ plt.title("Brutlag's predicted deviation");
 We'll apply the same algorithm for the second series which, as you may recall, has trend and a 30-day seasonality.
 
 
-```python
+```{code-cell} ipython3
 %%time
 data = currency.GEMS_GEMS_SPENT[:-50]
 slen = 30  # 30-day seasonality
@@ -801,19 +801,19 @@ model.triple_exponential_smoothing()
 ```
 
 
-```python
+```{code-cell} ipython3
 plotHoltWinters(currency.GEMS_GEMS_SPENT)
 ```
 
 Looks good! The model caught both upwards trend and seasonal spikes and fits the data quite nicely.
 
 
-```python
+```{code-cell} ipython3
 plotHoltWinters(currency.GEMS_GEMS_SPENT, plot_intervals=True, plot_anomalies=True)
 ```
 
 
-```python
+```{code-cell} ipython3
 plt.figure(figsize=(20, 5))
 plt.plot(model.PredictedDeviation)
 plt.grid(True)
@@ -848,7 +848,7 @@ So, in order to combat non-stationarity, we have to know our enemy, so to speak.
 White noise chart:
 
 
-```python
+```{code-cell} ipython3
 white_noise = np.random.normal(size=1000)
 with plt.style.context("bmh"):
     plt.figure(figsize=(15, 5))
@@ -860,7 +860,7 @@ The process generated by the standard normal distribution is stationary and osci
 Here is the code to render the plots.
 
 
-```python
+```{code-cell} ipython3
 def plotProcess(n_samples=1000, rho=0):
     x = w = np.random.normal(size=n_samples)
     for t in range(n_samples):
@@ -893,7 +893,7 @@ Let's build an ARIMA model by walking through all the ~~circles of hell~~ stages
 Here is the code to render plots.
 
 
-```python
+```{code-cell} ipython3
 def tsplot(y, lags=None, figsize=(12, 7), style="bmh"):
     """
         Plot time series, its ACF and PACF, calculate Dickey–Fuller test
@@ -922,7 +922,7 @@ def tsplot(y, lags=None, figsize=(12, 7), style="bmh"):
 ```
 
 
-```python
+```{code-cell} ipython3
 tsplot(ads.Ads, lags=60)
 ```
 
@@ -931,7 +931,7 @@ _this outlier on partial autocorrelation plot looks like a statsmodels bug, part
 Surprisingly, the initial series are stationary; the Dickey-Fuller test rejected the null hypothesis that a unit root is present. Actually, we can see this on the plot itself – we do not have a visible trend, so the mean is constant and the variance is pretty much stable. The only thing left is seasonality, which we have to deal with prior to modeling. To do so, let's take the "seasonal difference", which means a simple subtraction of the series from itself with a lag that equals the seasonal period.
 
 
-```python
+```{code-cell} ipython3
 ads_diff = ads.Ads - ads.Ads.shift(24)
 tsplot(ads_diff[24:], lags=60)
 ```
@@ -939,7 +939,7 @@ tsplot(ads_diff[24:], lags=60)
 It is now much better with the visible seasonality gone. However, the autocorrelation function still has too many significant lags. To remove them, we'll take first differences, subtracting the series from itself with lag 1.
 
 
-```python
+```{code-cell} ipython3
 ads_diff = ads_diff - ads_diff.shift(1)
 tsplot(ads_diff[24 + 1 :], lags=60)
 ```
@@ -976,7 +976,7 @@ With this, we have three parameters: $(P, D, Q)$
 Now that we know how to set the initial parameters, let's have a look at the final plot once again and set the parameters:
 
 
-```python
+```{code-cell} ipython3
 tsplot(ads_diff[24 + 1 :], lags=60)
 ```
 
@@ -990,7 +990,7 @@ tsplot(ads_diff[24 + 1 :], lags=60)
 Let's test various models and see which one is better.
 
 
-```python
+```{code-cell} ipython3
 # setting initial values and some bounds for them
 ps = range(2, 5)
 d = 1
@@ -1007,7 +1007,7 @@ len(parameters_list)
 ```
 
 
-```python
+```{code-cell} ipython3
 def optimizeSARIMA(parameters_list, d, D, s):
     """
         Return dataframe with parameters and corresponding AIC
@@ -1050,18 +1050,18 @@ def optimizeSARIMA(parameters_list, d, D, s):
 ```
 
 
-```python
+```{code-cell} ipython3
 %%time
 result_table = optimizeSARIMA(parameters_list, d, D, s)
 ```
 
 
-```python
+```{code-cell} ipython3
 result_table.head()
 ```
 
 
-```python
+```{code-cell} ipython3
 # set the parameters that give the lowest AIC
 p, q, P, Q = result_table.parameters[0]
 
@@ -1074,14 +1074,14 @@ print(best_model.summary())
 Let's inspect the residuals of the model.
 
 
-```python
+```{code-cell} ipython3
 tsplot(best_model.resid[24 + 1 :], lags=60)
 ```
 
 It is clear that the residuals are stationary, and there are no apparent autocorrelations. Let's make predictions using our model.
 
 
-```python
+```{code-cell} ipython3
 def plotSARIMA(series, model, n_steps):
     """
         Plots model vs predicted values
@@ -1117,7 +1117,7 @@ def plotSARIMA(series, model, n_steps):
 ```
 
 
-```python
+```{code-cell} ipython3
 plotSARIMA(ads, best_model, 50)
 ```
 
@@ -1152,21 +1152,21 @@ Let's run through some of the methods and see what we can extract from our ads t
 Shifting the series $n$ steps back, we get a feature column where the current value of time series is aligned with its value at time $t-n$. If we make a 1 lag shift and train a model on that feature, the model will be able to forecast 1 step ahead from having observed the current state of the series. Increasing the lag, say, up to 6, will allow the model to make predictions 6 steps ahead; however it will use data observed 6 steps back. If something fundamentally changes the series during that unobserved period, the model will not catch these changes and will return forecasts with a large error. Therefore, during the initial lag selection, one has to find a balance between the optimal prediction quality and the length of the forecasting horizon.
 
 
-```python
+```{code-cell} ipython3
 # Creating a copy of the initial datagrame to make various transformations
 data = pd.DataFrame(ads.Ads.copy())
 data.columns = ["y"]
 ```
 
 
-```python
+```{code-cell} ipython3
 # Adding the lag of the target variable from 6 steps back up to 24
 for i in range(6, 25):
     data["lag_{}".format(i)] = data.y.shift(i)
 ```
 
 
-```python
+```{code-cell} ipython3
 # take a look at the new dataframe
 data.tail(7)
 ```
@@ -1174,7 +1174,7 @@ data.tail(7)
 Great, we have generated a dataset here. Why don't we now train a model? 
 
 
-```python
+```{code-cell} ipython3
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import cross_val_score
 
@@ -1183,7 +1183,7 @@ tscv = TimeSeriesSplit(n_splits=5)
 ```
 
 
-```python
+```{code-cell} ipython3
 def timeseries_train_test_split(X, y, test_size):
     """
         Perform train-test split with respect to time series structure
@@ -1201,7 +1201,7 @@ def timeseries_train_test_split(X, y, test_size):
 ```
 
 
-```python
+```{code-cell} ipython3
 y = data.dropna().y
 X = data.dropna().drop(["y"], axis=1)
 
@@ -1210,14 +1210,14 @@ X_train, X_test, y_train, y_test = timeseries_train_test_split(X, y, test_size=0
 ```
 
 
-```python
+```{code-cell} ipython3
 # machine learning in two lines
 lr = LinearRegression()
 lr.fit(X_train, y_train)
 ```
 
 
-```python
+```{code-cell} ipython3
 def plotModelResults(
     model, X_train=X_train, X_test=X_test, plot_intervals=False, plot_anomalies=False
 ):
@@ -1276,7 +1276,7 @@ def plotCoefficients(model):
 ```
 
 
-```python
+```{code-cell} ipython3
 plotModelResults(lr, plot_intervals=True)
 plotCoefficients(lr)
 ```
@@ -1286,7 +1286,7 @@ Simple lags and linear regression gave us predictions that are not that far off 
 We'll add hour, day of week, and a boolean for `is_weekend`. To do so, we need to transform the current dataframe index into the `datetime` format and extract `hour` and `weekday`.
 
 
-```python
+```{code-cell} ipython3
 data.index = pd.to_datetime(data.index)
 data["hour"] = data.index.hour
 data["weekday"] = data.index.weekday
@@ -1297,7 +1297,7 @@ data.tail()
 We can visualize the resulting features.
 
 
-```python
+```{code-cell} ipython3
 plt.figure(figsize=(16, 5))
 plt.title("Encoded features")
 data.hour.plot()
@@ -1309,14 +1309,14 @@ plt.grid(True);
 Since we now have different scales in our variables, thousands for the lag features and tens for categorical, we need to transform them into same scale for exploring feature importance and, later, regularization. 
 
 
-```python
+```{code-cell} ipython3
 from sklearn.preprocessing import StandardScaler
 
 scaler = StandardScaler()
 ```
 
 
-```python
+```{code-cell} ipython3
 y = data.dropna().y
 X = data.dropna().drop(["y"], axis=1)
 
@@ -1338,7 +1338,7 @@ The test error goes down a little bit. Judging by the coefficients plot, we can 
 I'd like to add another variant for encoding categorical variables: encoding by mean value. If it is undesirable to explode a dataset by using many dummy variables that can lead to the loss of information and if they cannot be used as real values because of the conflicts like "0 hours < 23 hours", then it's possible to encode a variable with slightly more interpretable values. The natural idea is to encode with the mean value of the target variable. In our example, every day of the week and every hour of the day can be encoded by the corresponding average number of ads watched during that day or hour. It's very important to make sure that the mean value is calculated over the training set only (or over the current cross-validation fold only) so that the model is not aware of the future.
 
 
-```python
+```{code-cell} ipython3
 def code_mean(data, cat_feature, real_feature):
     """
     Returns a dictionary where keys are unique categories of the cat_feature,
@@ -1350,7 +1350,7 @@ def code_mean(data, cat_feature, real_feature):
 Let's look at the averages by hour.
 
 
-```python
+```{code-cell} ipython3
 average_hour = code_mean(data, "hour", "y")
 plt.figure(figsize=(7, 5))
 plt.title("Hour averages")
@@ -1361,7 +1361,7 @@ plt.grid(True);
 Finally, let's put all the transformations together in a single function .
 
 
-```python
+```{code-cell} ipython3
 def prepareData(series, lag_start, lag_end, test_size, target_encoding=False):
     """
         series: pd.DataFrame
@@ -1423,7 +1423,7 @@ def prepareData(series, lag_start, lag_end, test_size, target_encoding=False):
 ```
 
 
-```python
+```{code-cell} ipython3
 X_train, X_test, y_train, y_test = prepareData(
     ads.Ads, lag_start=6, lag_end=25, test_size=0.3, target_encoding=True
 )
@@ -1447,7 +1447,7 @@ plotCoefficients(lr)
 We see some **overfitting**! `Hour_average` was so great in the training dataset that the model decided to concentrate all of its forces on it. As a result, the quality of prediction dropped. This problem can be solved in a variety of ways; for example, we can calculate the target encoding not for the whole train set, but for some window instead. That way, encodings from the last observed window will most likely better describe the current series state. Alternatively, we can just drop it manually since we are sure that it makes things only worse in this case. 
 
 
-```python
+```{code-cell} ipython3
 X_train, X_test, y_train, y_test = prepareData(
     ads.Ads, lag_start=6, lag_end=25, test_size=0.3, target_encoding=False
 )
@@ -1469,13 +1469,13 @@ The second regression model, Lasso regression, adds to the loss function, not sq
 First, let's make sure that we have features to drop and that the data has highly correlated features.
 
 
-```python
+```{code-cell} ipython3
 plt.figure(figsize=(10, 8))
 sns.heatmap(X_train.corr());
 ```
 
 
-```python
+```{code-cell} ipython3
 from sklearn.linear_model import LassoCV, RidgeCV
 
 ridge = RidgeCV(cv=tscv)
@@ -1494,7 +1494,7 @@ plotCoefficients(ridge)
 We can clearly see some coefficients are getting closer and closer to zero (though they never actually reach it) as their importance in the model drops.
 
 
-```python
+```{code-cell} ipython3
 lasso = LassoCV(cv=tscv)
 lasso.fit(X_train_scaled, y_train)
 
@@ -1515,7 +1515,7 @@ Why shouldn't we try XGBoost now?
 <img src="../../img/xgboost_the_things.jpg"/>
 
 
-```python
+```{code-cell} ipython3
 from xgboost import XGBRegressor
 
 xgb = XGBRegressor(verbosity=0)
@@ -1523,7 +1523,7 @@ xgb.fit(X_train_scaled, y_train);
 ```
 
 
-```python
+```{code-cell} ipython3
 plotModelResults(
     xgb,
     X_train=X_train_scaled,

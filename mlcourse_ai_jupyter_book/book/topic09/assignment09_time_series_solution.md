@@ -12,7 +12,7 @@ Author: Mariya Mansurova, Analyst & developer in Yandex.Metrics team. Translated
 **Fill cells marked with "Your code here" and submit your answers to the questions through the [web form](https://docs.google.com/forms/d/1UYQ_WYSpsV3VSlZAzhSN_YXmyjV7YlTP8EYMg8M8SoM/edit).**
 
 
-```python
+```{code-cell} ipython3
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -44,7 +44,7 @@ def plotly_df(df, title=""):
 ## Data preparation
 
 
-```python
+```{code-cell} ipython3
 # for Jupyter-book, we copy data from GitHub, locally, to save Internet traffic,
 # you can specify the data/ folder from the root of your cloned 
 # https://github.com/Yorko/mlcourse.ai repo, to save Internet traffic
@@ -52,14 +52,14 @@ DATA_PATH = "https://raw.githubusercontent.com/Yorko/mlcourse.ai/master/data/"
 ```
 
 
-```python
+```{code-cell} ipython3
 df = pd.read_csv(DATA_PATH + "wiki_machine_learning.csv", sep=" ")
 df = df[df["count"] != 0]
 df.head()
 ```
 
 
-```python
+```{code-cell} ipython3
 df.shape
 ```
 
@@ -67,22 +67,22 @@ df.shape
 We will train at first 5 months and predict the number of trips for June.
 
 
-```python
+```{code-cell} ipython3
 df.date = pd.to_datetime(df.date)
 ```
 
 
-```python
+```{code-cell} ipython3
 plotly_df(df.set_index("date")[["count"]])
 ```
 
 
-```python
+```{code-cell} ipython3
 from fbprophet import Prophet
 ```
 
 
-```python
+```{code-cell} ipython3
 predictions = 30
 
 df = df[["date", "count"]]
@@ -91,24 +91,24 @@ df.tail()
 ```
 
 
-```python
+```{code-cell} ipython3
 train_df = df[:-predictions].copy()
 ```
 
 
-```python
+```{code-cell} ipython3
 m = Prophet()
 m.fit(train_df);
 ```
 
 
-```python
+```{code-cell} ipython3
 future = m.make_future_dataframe(periods=predictions)
 future.tail()
 ```
 
 
-```python
+```{code-cell} ipython3
 forecast = m.predict(future)
 forecast.tail()
 ```
@@ -121,24 +121,24 @@ forecast.tail()
 - 2744
 
 
-```python
+```{code-cell} ipython3
 m.plot(forecast)
 ```
 
 
-```python
+```{code-cell} ipython3
 m.plot_components(forecast)
 ```
 
 
-```python
+```{code-cell} ipython3
 cmp_df = forecast.set_index("ds")[["yhat", "yhat_lower", "yhat_upper"]].join(
     df.set_index("ds")
 )
 ```
 
 
-```python
+```{code-cell} ipython3
 cmp_df["e"] = cmp_df["y"] - cmp_df["yhat"]
 cmp_df["p"] = 100 * cmp_df["e"] / cmp_df["y"]
 print("MAPE = ", round(np.mean(abs(cmp_df[-predictions:]["p"])), 2))
@@ -164,7 +164,7 @@ Estimate the quality of the prediction with the last 30 points.
 ## Predicting with ARIMA
 
 
-```python
+```{code-cell} ipython3
 %matplotlib inline
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
@@ -181,7 +181,7 @@ plt.rcParams["figure.figsize"] = (15, 10)
 - Series is not stationary, p_value = 0.001
 
 
-```python
+```{code-cell} ipython3
 sm.tsa.seasonal_decompose(train_df["y"].values, freq=7).plot()
 print("Dickey-Fuller test: p=%f" % sm.tsa.stattools.adfuller(train_df["y"])[1])
 ```
@@ -189,19 +189,19 @@ print("Dickey-Fuller test: p=%f" % sm.tsa.stattools.adfuller(train_df["y"])[1])
 But the seasonally differentiated series will already be stationary.
 
 
-```python
+```{code-cell} ipython3
 train_df.set_index("ds", inplace=True)
 ```
 
 
-```python
+```{code-cell} ipython3
 train_df["y_diff"] = train_df.y - train_df.y.shift(7)
 sm.tsa.seasonal_decompose(train_df.y_diff[7:].values, freq=7).plot()
 print("Dickey-Fuller test: p=%f" % sm.tsa.stattools.adfuller(train_df.y_diff[8:])[1])
 ```
 
 
-```python
+```{code-cell} ipython3
 ax = plt.subplot(211)
 sm.graphics.tsa.plot_acf(train_df.y_diff[13:].values.squeeze(), lags=48, ax=ax)
 
@@ -216,7 +216,7 @@ Initial values:
 * p = 1
 
 
-```python
+```{code-cell} ipython3
 ps = range(0, 2)
 ds = range(0, 2)
 qs = range(0, 4)
@@ -226,7 +226,7 @@ Qs = range(0, 2)
 ```
 
 
-```python
+```{code-cell} ipython3
 from itertools import product
 
 parameters = product(ps, ds, qs, Ps, Ds, Qs)
@@ -235,7 +235,7 @@ len(parameters_list)
 ```
 
 
-```python
+```{code-cell} ipython3
 %%time
 import warnings
 
@@ -266,7 +266,7 @@ for param in tqdm(parameters_list):
 ```
 
 
-```python
+```{code-cell} ipython3
 result_table1 = pd.DataFrame(results1)
 result_table1.columns = ["parameters", "aic"]
 print(result_table1.sort_values(by="aic", ascending=True).head())
@@ -275,7 +275,7 @@ print(result_table1.sort_values(by="aic", ascending=True).head())
 If we consider the variants proposed in the form:
 
 
-```python
+```{code-cell} ipython3
 result_table1[
     result_table1["parameters"].isin(
         [(1, 0, 2, 3, 1, 0), (1, 1, 2, 3, 2, 1), (1, 1, 2, 3, 1, 1), (1, 0, 2, 3, 0, 0)]
@@ -286,7 +286,7 @@ result_table1[
 Now do the same, but for the series with Box-Cox transformation.
 
 
-```python
+```{code-cell} ipython3
 import scipy.stats
 
 train_df["y_box"], lmbda = scipy.stats.boxcox(train_df["y"])
@@ -294,7 +294,7 @@ print("The optimal Box-Cox transformation parameter: %f" % lmbda)
 ```
 
 
-```python
+```{code-cell} ipython3
 results2 = []
 best_aic = float("inf")
 
@@ -321,7 +321,7 @@ warnings.filterwarnings("default")
 ```
 
 
-```python
+```{code-cell} ipython3
 result_table2 = pd.DataFrame(results2)
 result_table2.columns = ["parameters", "aic"]
 print(result_table2.sort_values(by="aic", ascending=True).head())
@@ -330,7 +330,7 @@ print(result_table2.sort_values(by="aic", ascending=True).head())
 If we consider the variants proposed in the form:
 
 
-```python
+```{code-cell} ipython3
 result_table2[
     result_table2["parameters"].isin(
         [(1, 0, 2, 3, 1, 0), (1, 1, 2, 3, 2, 1), (1, 1, 2, 3, 1, 1), (1, 0, 2, 3, 0, 0)]
@@ -348,12 +348,12 @@ result_table2[
 Let's look at the forecast of the best AIC model.
 
 
-```python
+```{code-cell} ipython3
 print(best_model.summary())
 ```
 
 
-```python
+```{code-cell} ipython3
 plt.subplot(211)
 best_model.resid[13:].plot()
 plt.ylabel(u"Residuals")
@@ -366,7 +366,7 @@ print("Dickey-Fuller test: p=%f" % sm.tsa.stattools.adfuller(best_model.resid[13
 ```
 
 
-```python
+```{code-cell} ipython3
 def invboxcox(y, lmbda):
     # reverse Box Cox transformation
     if lmbda == 0:
@@ -376,7 +376,7 @@ def invboxcox(y, lmbda):
 ```
 
 
-```python
+```{code-cell} ipython3
 train_df["arima_model"] = invboxcox(best_model.fittedvalues, lmbda)
 
 train_df.y.tail(200).plot()

@@ -14,7 +14,7 @@ Here we'll implement a regressor trained with stochastic gradient descent (SGD).
 ## <center>Linear regression and Stochastic Gradient Descent
 
 
-```python
+```{code-cell} ipython3
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator
@@ -39,7 +39,7 @@ Implement class `SGDRegressor`. Specification:
 - The `predict` method takes `X` matrix, adds column of ones to the left side and returns prediction vector, using weight vector `w_`, created by the `fit` method.
 
 
-```python
+```{code-cell} ipython3
 class SGDRegressor(BaseEstimator):
     # you code here
     def __init__(self):
@@ -55,7 +55,7 @@ class SGDRegressor(BaseEstimator):
 Let's test out the algorithm on height/weight data. We will predict heights (in inches) based on weights (in lbs).
 
 
-```python
+```{code-cell} ipython3
 # for Jupyter-book, we copy data from GitHub, locally, to save Internet traffic,
 # you can specify the data/ folder from the root of your cloned 
 # https://github.com/Yorko/mlcourse.ai repo, to save Internet traffic
@@ -63,12 +63,12 @@ DATA_PATH = "https://raw.githubusercontent.com/Yorko/mlcourse.ai/master/data/"
 ```
 
 
-```python
+```{code-cell} ipython3
 data_demo = pd.read_csv(DATA_PATH + "weights_heights.csv")
 ```
 
 
-```python
+```{code-cell} ipython3
 plt.scatter(data_demo["Weight"], data_demo["Height"])
 plt.xlabel("Weight (lbs)")
 plt.ylabel("Height (Inch)")
@@ -76,21 +76,21 @@ plt.grid();
 ```
 
 
-```python
+```{code-cell} ipython3
 X, y = data_demo["Weight"].values, data_demo["Height"].values
 ```
 
 Perform train/test split and scale data.
 
 
-```python
+```{code-cell} ipython3
 X_train, X_valid, y_train, y_valid = train_test_split(
     X, y, test_size=0.3, random_state=17
 )
 ```
 
 
-```python
+```{code-cell} ipython3
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train.reshape([-1, 1]))
 X_valid_scaled = scaler.transform(X_valid.reshape([-1, 1]))
@@ -99,35 +99,35 @@ X_valid_scaled = scaler.transform(X_valid.reshape([-1, 1]))
 Train created `SGDRegressor` with `(X_train_scaled, y_train)` data. Leave default parameter values for now.
 
 
-```python
+```{code-cell} ipython3
 # you code here
 ```
 
 Draw a chart with training process  – dependency of mean squared error from the i-th SGD iteration number.
 
 
-```python
+```{code-cell} ipython3
 # you code here
 ```
 
 Print the minimal value of mean squared error and the best weights vector.
 
 
-```python
+```{code-cell} ipython3
 # you code here
 ```
 
 Draw chart of model weights ($w_0$ and $w_1$) behavior during training.
 
 
-```python
+```{code-cell} ipython3
 # you code here
 ```
 
 Make a prediction for hold-out  set `(X_valid_scaled, y_valid)` and check MSE value.
 
 
-```python
+```{code-cell} ipython3
 # you code here
 sgd_holdout_mse = 10
 ```
@@ -135,13 +135,13 @@ sgd_holdout_mse = 10
 Do the same thing for `LinearRegression` class from `sklearn.linear_model`. Evaluate MSE for hold-out set.
 
 
-```python
+```{code-cell} ipython3
 # you code here
 linreg_holdout_mse = 9
 ```
 
 
-```python
+```{code-cell} ipython3
 try:
     assert (sgd_holdout_mse - linreg_holdout_mse) < 1e-4
     print("Correct!")

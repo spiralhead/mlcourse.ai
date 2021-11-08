@@ -73,7 +73,7 @@ The next steps are easier to digest. We multiply the matrix of our data $X$ by t
 Let's start by uploading all of the essential modules and try out the iris example from the `scikit-learn` documentation. 
 
 
-```python
+```{code-cell} ipython3
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -117,7 +117,7 @@ ax.w_zaxis.set_ticklabels([]);
 Now let's see how PCA will improve the results of a simple model that is not able to correctly fit all of the training data:
 
 
-```python
+```{code-cell} ipython3
 from sklearn.metrics import accuracy_score, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
@@ -137,7 +137,7 @@ print("Accuracy: {:.5f}".format(accuracy_score(y_test, preds.argmax(axis=1))))
 Let's try this again, but, this time, let's reduce the dimensionality to 2 dimensions:
 
 
-```python
+```{code-cell} ipython3
 # Using PCA from sklearn PCA
 pca = decomposition.PCA(n_components=2)
 X_centered = X - X.mean(axis=0)
@@ -152,7 +152,7 @@ plt.legend(loc=0);
 ```
 
 
-```python
+```{code-cell} ipython3
 # Test-train split and apply PCA
 X_train, X_test, y_train, y_test = train_test_split(
     X_pca, y, test_size=0.3, stratify=y, random_state=42
@@ -169,7 +169,7 @@ The accuracy did not increase significantly in this case, but, with other datase
 Now let's check out the percent of variance that can be explained by each of the selected components.
 
 
-```python
+```{code-cell} ipython3
 for i, component in enumerate(pca.components_):
     print(
         "{} component: {}% of initial variance".format(
@@ -189,7 +189,7 @@ for i, component in enumerate(pca.components_):
 Let's look at the handwritten numbers dataset that we used before in the [3rd lesson](https://habrahabr.ru/company/ods/blog/322534/#derevya-resheniy-i-metod-blizhayshih-sosedey-v-zadache-raspoznavaniya-rukopisnyh-cifr-mnist).
 
 
-```python
+```{code-cell} ipython3
 digits = datasets.load_digits()
 X = digits.data
 y = digits.target
@@ -198,7 +198,7 @@ y = digits.target
 Let's start by visualizing our data. Fetch the first 10 numbers. The numbers are represented by 8 x 8 matrixes with the color intensity for each pixel. Every matrix is flattened into a vector of 64 numbers, so we get the feature version of the data.
 
 
-```python
+```{code-cell} ipython3
 # f, axes = plt.subplots(5, 2, sharey=True, figsize=(16,6))
 plt.figure(figsize=(16, 6))
 for i in range(10):
@@ -209,7 +209,7 @@ for i in range(10):
 Our data has 64 dimensions, but we are going to reduce it to only 2 and see that, even with just 2 dimensions, we can clearly see that digits separate into clusters.
 
 
-```python
+```{code-cell} ipython3
 pca = decomposition.PCA(n_components=2)
 X_reduced = pca.fit_transform(X)
 
@@ -232,7 +232,7 @@ plt.title("MNIST. PCA projection");
 Indeed, with t-SNE, the picture looks better since PCA has a linear constraint while t-SNE does not. However, even with such a small dataset, the t-SNE algorithm takes significantly more time to complete than PCA.
 
 
-```python
+```{code-cell} ipython3
 %%time
 
 from sklearn.manifold import TSNE
@@ -258,7 +258,7 @@ plt.title("MNIST. t-SNE projection");
 In practice, we would choose the number of principal components such that we can explain 90% of the initial data dispersion (via the `explained_variance_ratio`). Here, that means retaining 21 principal components; therefore, we reduce the dimensionality from 64 features to 21.
 
 
-```python
+```{code-cell} ipython3
 pca = decomposition.PCA().fit(X)
 
 plt.figure(figsize=(10, 7))
@@ -292,7 +292,7 @@ K-means algorithm is the most popular and yet simplest of all the clustering alg
 This algorithm is easy to describe and visualize. Let's take a look.
 
 
-```python
+```{code-cell} ipython3
 # Let's begin by allocation 3 cluster's points
 X = np.zeros((150, 2))
 
@@ -311,7 +311,7 @@ plt.plot(X[:, 0], X[:, 1], "bo");
 ```
 
 
-```python
+```{code-cell} ipython3
 # Scipy has function that takes 2 tuples and return
 # calculated distance between them
 from scipy.spatial.distance import cdist
@@ -340,7 +340,7 @@ for i in range(3):
 ```
 
 
-```python
+```{code-cell} ipython3
 # Let's plot K-means
 plt.figure(figsize=(8, 8))
 for i in range(4):
@@ -376,12 +376,12 @@ $$ D(k) = \frac{|J(C_k) - J(C_{k+1})|}{|J(C_{k-1}) - J(C_k)|}  \rightarrow \min\
 Let's look at an example.
 
 
-```python
+```{code-cell} ipython3
 from sklearn.cluster import KMeans
 ```
 
 
-```python
+```{code-cell} ipython3
 inertia = []
 for k in range(1, 8):
     kmeans = KMeans(n_clusters=k, random_state=1).fit(X)
@@ -389,7 +389,7 @@ for k in range(1, 8):
 ```
 
 
-```python
+```{code-cell} ipython3
 plt.plot(range(1, 8), inertia, marker="s")
 plt.xlabel("$k$")
 plt.ylabel("$J(C_k)$");
@@ -456,7 +456,7 @@ The results can be visualized as a beautiful cluster tree (dendogram) to help re
 Let's consider an example with the clusters we got from K-means:
 
 
-```python
+```{code-cell} ipython3
 from scipy.cluster import hierarchy
 from scipy.spatial.distance import pdist
 
@@ -521,7 +521,7 @@ With the help of silhouette, we can identify the optimal number of clusters $k$ 
 To conclude, let's take a look at how these metrics perform with the MNIST handwritten numbers dataset:
 
 
-```python
+```{code-cell} ipython3
 import pandas as pd
 from sklearn import datasets, metrics
 from sklearn.cluster import (AffinityPropagation, AgglomerativeClustering,

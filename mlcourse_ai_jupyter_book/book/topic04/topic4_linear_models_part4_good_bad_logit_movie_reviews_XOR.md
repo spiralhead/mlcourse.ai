@@ -1,11 +1,27 @@
+---
+jupytext:
+  formats: md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python3
+---
+
+(topic4_part4)=
+
+
+# Topic 4. Linear Classification and Regression
+## Part 4. Where Logistic Regression Is Good and Where It's Not
+
+
 <img src="https://habrastorage.org/webt/ia/m9/zk/iam9zkyzqebnf_okxipihkgjwnw.jpeg" />
     
 **<center>[mlcourse.ai](https://mlcourse.ai) – Open Machine Learning Course** </center><br>
 
 Author: [Yury Kashnitsky](https://yorko.github.io). Translated and edited by [Christina Butsko](https://www.linkedin.com/in/christinabutsko/), [Nerses Bagiyan](https://www.linkedin.com/in/nersesbagiyan/), [Yulia Klimushina](https://www.linkedin.com/in/yuliya-klimushina-7168a9139), and [Yuanyuan Pao](https://www.linkedin.com/in/yuanyuanpao/). This material is subject to the terms and conditions of the [Creative Commons CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) license. Free use is permitted for any non-commercial purpose.
-
-# <center>Topic 4. Linear Classification and Regression
-## <center> Part 4. Where Logistic Regression Is Good and Where It's Not
     
             
 ## Article outline
@@ -21,7 +37,7 @@ Now for a little practice! We want to solve the problem of binary classification
 <img src="../../_static/img/bag_of_words.svg" width=80% />
 
 
-```python
+```{code-cell} ipython3
 import os
 
 import matplotlib.pyplot as plt
@@ -34,7 +50,7 @@ from sklearn.linear_model import LogisticRegression
 **To get started, we automatically download the dataset from [here](http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz) and unarchive it along with the rest of datasets in the data folder. The dataset is briefly described [here](http://ai.stanford.edu/~amaas/data/sentiment/). There are 12.5k of good and bad reviews in the test and training sets.**
 
 
-```python
+```{code-cell} ipython3
 import tarfile
 from io import BytesIO
 
@@ -64,7 +80,7 @@ load_imdb_dataset()
 ```
 
 
-```python
+```{code-cell} ipython3
 # for Jupyter-book, we copy data from GitHub, locally, to save Internet traffic,
 # you can specify the data/ folder from the root of your cloned 
 # https://github.com/Yorko/mlcourse.ai repo, to save Internet traffic
@@ -72,7 +88,7 @@ DATA_PATH = "https://raw.githubusercontent.com/Yorko/mlcourse.ai/master/data/"
 ```
 
 
-```python
+```{code-cell} ipython3
 # change if you have it in alternative location
 PATH_TO_IMDB = DATA_PATH + "aclImdb"
 
@@ -86,7 +102,7 @@ text_test, y_test = reviews_test.data, reviews_test.target
 ```
 
 
-```python
+```{code-cell} ipython3
 # # Alternatively, load data from previously pickled objects.
 # import pickle
 # with open('../../data/imdb_text_train.pkl', 'rb') as f:
@@ -100,7 +116,7 @@ text_test, y_test = reviews_test.data, reviews_test.target
 ```
 
 
-```python
+```{code-cell} ipython3
 print("Number of documents in training data: %d" % len(text_train))
 print(np.bincount(y_train))
 print("Number of documents in test data: %d" % len(text_test))
@@ -110,27 +126,27 @@ print(np.bincount(y_test))
 **Here are a few examples of the reviews.**
 
 
-```python
+```{code-cell} ipython3
 print(text_train[1])
 ```
 
 
-```python
+```{code-cell} ipython3
 y_train[1]  # bad review
 ```
 
 
-```python
+```{code-cell} ipython3
 text_train[2]
 ```
 
 
-```python
+```{code-cell} ipython3
 y_train[2]  # good review
 ```
 
 
-```python
+```{code-cell} ipython3
 # import pickle
 # with open('../../data/imdb_text_train.pkl', 'wb') as f:
 #     pickle.dump(text_train, f)
@@ -147,7 +163,7 @@ y_train[2]  # good review
 **First, we will create a dictionary of all the words using CountVectorizer**
 
 
-```python
+```{code-cell} ipython3
 cv = CountVectorizer()
 cv.fit(text_train)
 
@@ -157,7 +173,7 @@ len(cv.vocabulary_)
 **If you look at the examples of "words" (let's call them tokens), you can see that we have omitted many of the important steps in text processing (automatic text processing can itself be a completely separate series of articles).**
 
 
-```python
+```{code-cell} ipython3
 print(cv.get_feature_names()[:50])
 print(cv.get_feature_names()[50000:50050])
 ```
@@ -165,7 +181,7 @@ print(cv.get_feature_names()[50000:50050])
 **Secondly, we are encoding the sentences from the training set texts with the indices of incoming words. We'll use the sparse format.**
 
 
-```python
+```{code-cell} ipython3
 X_train = cv.transform(text_train)
 X_train
 ```
@@ -173,31 +189,31 @@ X_train
 **Let's see how our transformation worked**
 
 
-```python
+```{code-cell} ipython3
 print(text_train[19726])
 ```
 
 
-```python
+```{code-cell} ipython3
 X_train[19726].nonzero()[1]
 ```
 
 
-```python
+```{code-cell} ipython3
 X_train[19726].nonzero()
 ```
 
 **Third, we will apply the same operations to the test set**
 
 
-```python
+```{code-cell} ipython3
 X_test = cv.transform(text_test)
 ```
 
 **The next step is to train Logistic Regression.**
 
 
-```python
+```{code-cell} ipython3
 %%time
 logit = LogisticRegression(solver="lbfgs", n_jobs=-1, random_state=7)
 logit.fit(X_train, y_train)
@@ -206,14 +222,14 @@ logit.fit(X_train, y_train)
 **Let's look at accuracy on the both the training and the test sets.**
 
 
-```python
+```{code-cell} ipython3
 round(logit.score(X_train, y_train), 3), round(logit.score(X_test, y_test), 3),
 ```
 
 **The coefficients of the model can be beautifully displayed.**
 
 
-```python
+```{code-cell} ipython3
 def visualize_coefficients(classifier, feature_names, n_top_features=25):
     # get coefficients with large absolute values
     coef = classifier.coef_.ravel()
@@ -234,7 +250,7 @@ def visualize_coefficients(classifier, feature_names, n_top_features=25):
 ```
 
 
-```python
+```{code-cell} ipython3
 def plot_grid_scores(grid, param_name):
     plt.plot(
         grid.param_grid[param_name],
@@ -252,14 +268,14 @@ def plot_grid_scores(grid, param_name):
 ```
 
 
-```python
+```{code-cell} ipython3
 visualize_coefficients(logit, cv.get_feature_names())
 ```
 
 **To make our model better, we can optimize the regularization coefficient for the `Logistic Regression`. We'll use `sklearn.pipeline` because `CountVectorizer` should only be applied to the training data (so as to not "peek" into the test set and not count word frequencies there). In this case, `pipeline` determines the correct sequence of actions: apply `CountVectorizer`, then train `Logistic Regression`.**
 
 
-```python
+```{code-cell} ipython3
 %%time
 from sklearn.pipeline import make_pipeline
 
@@ -275,7 +291,7 @@ print(text_pipe_logit.score(text_test, y_test))
 ```
 
 
-```python
+```{code-cell} ipython3
 %%time
 from sklearn.model_selection import GridSearchCV
 
@@ -290,42 +306,42 @@ grid_logit.fit(text_train, y_train)
 **Let's print best $C$ and cv-score using this hyperparameter:**
 
 
-```python
+```{code-cell} ipython3
 grid_logit.best_params_, grid_logit.best_score_
 ```
 
 
-```python
+```{code-cell} ipython3
 plot_grid_scores(grid_logit, "logisticregression__C")
 ```
 
 For the validation set:
 
 
-```python
+```{code-cell} ipython3
 grid_logit.score(text_test, y_test)
 ```
 
 **Now let's do the same with random forest. We see that, with logistic regression, we achieve better accuracy with less effort.**
 
 
-```python
+```{code-cell} ipython3
 from sklearn.ensemble import RandomForestClassifier
 ```
 
 
-```python
+```{code-cell} ipython3
 forest = RandomForestClassifier(n_estimators=200, n_jobs=-1, random_state=17)
 ```
 
 
-```python
+```{code-cell} ipython3
 %%time
 forest.fit(X_train, y_train)
 ```
 
 
-```python
+```{code-cell} ipython3
 round(forest.score(X_test, y_test), 3)
 ```
 
@@ -343,7 +359,7 @@ XOR is the "exclusive OR", a Boolean function with the following truth table:
 XOR is the name given to a simple binary classification problem in which the classes are presented as diagonally extended intersecting point clouds.
 
 
-```python
+```{code-cell} ipython3
 # creating dataset
 rng = np.random.RandomState(0)
 X = rng.randn(200, 2)
@@ -351,14 +367,14 @@ y = np.logical_xor(X[:, 0] > 0, X[:, 1] > 0)
 ```
 
 
-```python
+```{code-cell} ipython3
 plt.scatter(X[:, 0], X[:, 1], s=30, c=y, cmap=plt.cm.Paired);
 ```
 
 Obviously, one cannot draw a single straight line to separate one class from another without errors. Therefore, logistic regression performs poorly with this task.
 
 
-```python
+```{code-cell} ipython3
 def plot_boundary(clf, X, y, plot_title):
     xx, yy = np.meshgrid(np.linspace(-3, 3, 50), np.linspace(-3, 3, 50))
     clf.fit(X, y)
@@ -386,7 +402,7 @@ def plot_boundary(clf, X, y, plot_title):
 ```
 
 
-```python
+```{code-cell} ipython3
 plot_boundary(
     LogisticRegression(solver="lbfgs"), X, y, "Logistic Regression, XOR problem"
 )
@@ -395,13 +411,13 @@ plot_boundary(
 But if one were to give polynomial features as an input (here, up to 2 degrees), then the problem is solved.
 
 
-```python
+```{code-cell} ipython3
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import PolynomialFeatures
 ```
 
 
-```python
+```{code-cell} ipython3
 logit_pipe = Pipeline(
     [
         ("poly", PolynomialFeatures(degree=2)),
@@ -411,7 +427,7 @@ logit_pipe = Pipeline(
 ```
 
 
-```python
+```{code-cell} ipython3
 plot_boundary(logit_pipe, X, y, "Logistic Regression + quadratic features. XOR problem")
 ```
 

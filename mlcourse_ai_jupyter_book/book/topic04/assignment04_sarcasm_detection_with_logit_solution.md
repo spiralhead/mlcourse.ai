@@ -1,12 +1,25 @@
-<center>
-<img src="../../img/ods_stickers.jpg">
-    
-## [mlcourse.ai](https://mlcourse.ai) - Open Machine Learning Course
+---
+jupytext:
+  formats: md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python3
+---
+
+(a4_demo_solution)=
+
+
+# Assignment 4 (demo). Solution
+## Sarcasm detection with logistic regression
+
+<img src="https://habrastorage.org/webt/ia/m9/zk/iam9zkyzqebnf_okxipihkgjwnw.jpeg" />
 
 Author: [Yury Kashnitsky](https://www.linkedin.com/in/festline/). All content is distributed under the [Creative Commons CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) license.
 
-## <center> Assignment 4 (demo). Solution
-### <center>  Sarcasm detection with logistic regression
     
 **Same assignment as a [Kaggle Kernel](https://www.kaggle.com/kashnitsky/a4-demo-sarcasm-detection-with-logit) + [solution](https://www.kaggle.com/kashnitsky/a4-demo-sarcasm-detection-with-logit-solution).**
 
@@ -14,12 +27,12 @@ Author: [Yury Kashnitsky](https://www.linkedin.com/in/festline/). All content is
 We'll be using the dataset from the [paper](https://arxiv.org/abs/1704.05579) "A Large Self-Annotated Corpus for Sarcasm" with >1mln comments from Reddit, labeled as either sarcastic or not. A processed version can be found on Kaggle in a form of a [Kaggle Dataset](https://www.kaggle.com/danofer/sarcasm).
 
 
-```python
+```{code-cell} ipython3
 PATH_TO_DATA = "../input/sarcasm/train-balanced-sarcasm.csv"
 ```
 
 
-```python
+```{code-cell} ipython3
 # some necessary imports
 import os
 
@@ -35,38 +48,38 @@ from sklearn.pipeline import Pipeline
 ```
 
 
-```python
+```{code-cell} ipython3
 train_df = pd.read_csv(PATH_TO_DATA)
 ```
 
 
-```python
+```{code-cell} ipython3
 train_df.head()
 ```
 
 
-```python
+```{code-cell} ipython3
 train_df.info()
 ```
 
 Some comments are missing, so we drop the corresponding rows.
 
 
-```python
+```{code-cell} ipython3
 train_df.dropna(subset=["comment"], inplace=True)
 ```
 
 We notice that the dataset is indeed balanced
 
 
-```python
+```{code-cell} ipython3
 train_df["label"].value_counts()
 ```
 
 We split data into training and validation parts.
 
 
-```python
+```{code-cell} ipython3
 train_texts, valid_texts, y_train, y_valid = train_test_split(
     train_df["comment"], train_df["label"], random_state=17
 )
@@ -83,7 +96,7 @@ train_texts, valid_texts, y_train, y_valid = train_test_split(
 Distribution of lengths for sarcastic and normal comments is almost the same.
 
 
-```python
+```{code-cell} ipython3
 train_df.loc[train_df["label"] == 1, "comment"].str.len().apply(np.log1p).hist(
     label="sarcastic", alpha=0.5
 )
@@ -94,12 +107,12 @@ plt.legend();
 ```
 
 
-```python
+```{code-cell} ipython3
 from wordcloud import STOPWORDS, WordCloud
 ```
 
 
-```python
+```{code-cell} ipython3
 wordcloud = WordCloud(
     background_color="black",
     stopwords=STOPWORDS,
@@ -114,14 +127,14 @@ wordcloud = WordCloud(
 Word cloud are nice, but not very useful
 
 
-```python
+```{code-cell} ipython3
 plt.figure(figsize=(16, 12))
 wordcloud.generate(str(train_df.loc[train_df["label"] == 1, "comment"]))
 plt.imshow(wordcloud);
 ```
 
 
-```python
+```{code-cell} ipython3
 plt.figure(figsize=(16, 12))
 wordcloud.generate(str(train_df.loc[train_df["label"] == 0, "comment"]))
 plt.imshow(wordcloud);
@@ -130,26 +143,26 @@ plt.imshow(wordcloud);
 Let's analyze whether some subreddits are more "sarcastic" on average than others
 
 
-```python
+```{code-cell} ipython3
 sub_df = train_df.groupby("subreddit")["label"].agg([np.size, np.mean, np.sum])
 sub_df.sort_values(by="sum", ascending=False).head(10)
 ```
 
 
-```python
+```{code-cell} ipython3
 sub_df[sub_df["size"] > 1000].sort_values(by="mean", ascending=False).head(10)
 ```
 
 The same for authors doesn't yield much insight. Except for the fact that somebody's comments were sampled - we can see the same amounts of sarcastic and non-sarcastic comments.
 
 
-```python
+```{code-cell} ipython3
 sub_df = train_df.groupby("author")["label"].agg([np.size, np.mean, np.sum])
 sub_df[sub_df["size"] > 300].sort_values(by="mean", ascending=False).head(10)
 ```
 
 
-```python
+```{code-cell} ipython3
 sub_df = (
     train_df[train_df["score"] >= 0]
     .groupby("score")["label"]
@@ -159,7 +172,7 @@ sub_df[sub_df["size"] > 300].sort_values(by="mean", ascending=False).head(10)
 ```
 
 
-```python
+```{code-cell} ipython3
 sub_df = (
     train_df[train_df["score"] < 0]
     .groupby("score")["label"]
@@ -171,7 +184,7 @@ sub_df[sub_df["size"] > 300].sort_values(by="mean", ascending=False).head(10)
 ### Part 2. Training the model
 
 
-```python
+```{code-cell} ipython3
 # build bigrams, put a limit on maximal number of features
 # and minimal word frequency
 tf_idf = TfidfVectorizer(ngram_range=(1, 2), max_features=50000, min_df=2)
@@ -182,26 +195,26 @@ tfidf_logit_pipeline = Pipeline([("tf_idf", tf_idf), ("logit", logit)])
 ```
 
 
-```python
+```{code-cell} ipython3
 %%time
 tfidf_logit_pipeline.fit(train_texts, y_train)
 ```
 
 
-```python
+```{code-cell} ipython3
 %%time
 valid_pred = tfidf_logit_pipeline.predict(valid_texts)
 ```
 
 
-```python
+```{code-cell} ipython3
 accuracy_score(y_valid, valid_pred)
 ```
 
 ### Part 3. Explaining the model
 
 
-```python
+```{code-cell} ipython3
 def plot_confusion_matrix(
     actual,
     predicted,
@@ -254,7 +267,7 @@ def plot_confusion_matrix(
 Confusion matrix is quite balanced.
 
 
-```python
+```{code-cell} ipython3
 plot_confusion_matrix(
     y_valid,
     valid_pred,
@@ -266,7 +279,7 @@ plot_confusion_matrix(
 Indeed, we can recognize some phrases indicative of sarcasm. Like "yes sure". 
 
 
-```python
+```{code-cell} ipython3
 import eli5
 
 eli5.show_weights(
@@ -281,7 +294,7 @@ So sarcasm detection is easy.
 ### Part 4. Improving the model
 
 
-```python
+```{code-cell} ipython3
 subreddits = train_df["subreddit"]
 train_subreddits, valid_subreddits = train_test_split(subreddits, random_state=17)
 ```
@@ -289,7 +302,7 @@ train_subreddits, valid_subreddits = train_test_split(subreddits, random_state=1
 We'll have separate Tf-Idf vectorizers for comments and for subreddits. It's possible to stick to a pipeline as well, but in that case it becomes a bit less straightforward. [Example](https://stackoverflow.com/questions/36731813/computing-separate-tfidf-scores-for-two-different-columns-using-sklearn)
 
 
-```python
+```{code-cell} ipython3
 tf_idf_texts = TfidfVectorizer(ngram_range=(1, 2), max_features=50000, min_df=2)
 tf_idf_subreddits = TfidfVectorizer(ngram_range=(1, 1))
 ```
@@ -297,33 +310,33 @@ tf_idf_subreddits = TfidfVectorizer(ngram_range=(1, 1))
 Do transformations separately for comments and subreddits. 
 
 
-```python
+```{code-cell} ipython3
 %%time
 X_train_texts = tf_idf_texts.fit_transform(train_texts)
 X_valid_texts = tf_idf_texts.transform(valid_texts)
 ```
 
 
-```python
+```{code-cell} ipython3
 X_train_texts.shape, X_valid_texts.shape
 ```
 
 
-```python
+```{code-cell} ipython3
 %%time
 X_train_subreddits = tf_idf_subreddits.fit_transform(train_subreddits)
 X_valid_subreddits = tf_idf_subreddits.transform(valid_subreddits)
 ```
 
 
-```python
+```{code-cell} ipython3
 X_train_subreddits.shape, X_valid_subreddits.shape
 ```
 
 Then, stack all features together.
 
 
-```python
+```{code-cell} ipython3
 from scipy.sparse import hstack
 
 X_train = hstack([X_train_texts, X_train_subreddits])
@@ -331,25 +344,25 @@ X_valid = hstack([X_valid_texts, X_valid_subreddits])
 ```
 
 
-```python
+```{code-cell} ipython3
 X_train.shape, X_valid.shape
 ```
 
 Train the same logistic regression.
 
 
-```python
+```{code-cell} ipython3
 logit.fit(X_train, y_train)
 ```
 
 
-```python
+```{code-cell} ipython3
 %%time
 valid_pred = logit.predict(X_valid)
 ```
 
 
-```python
+```{code-cell} ipython3
 accuracy_score(y_valid, valid_pred)
 ```
 
