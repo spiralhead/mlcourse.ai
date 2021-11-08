@@ -116,15 +116,4 @@ data/athlete_events.csv
 # other stuff
 .DS_Store
 .idea/
-jupyter_english/assignments_demo/_build/
-jupyter_english/assignments_demo/_config.yml
-jupyter_english/assignments_demo/_toc.yml
-jupyter_english/assignments_demo/landing-page.md
-
-# this is created by run_jupyter.sh or .cmd scripts
-home
-
-# solutions
-*_solution.ipynb
 mlcourse_ai_jupyter_book/_build/
-mlcourse_ai_jupyter_book/book/jupyter_english/

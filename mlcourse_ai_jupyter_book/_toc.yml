@@ -4,24 +4,24 @@
   chapters:
    - file: book/topic01/topic01_intro.md
      title: Topic 1 Intro
-   - file: book/topic01/topic01_pandas_data_analysis.ipynb
+   - file: book/topic01/topic01_pandas_data_analysis.md
      title: Exploratory data analysis with Pandas
-   - file: book/topic01/assignment01_pandas_uci_adult.ipynb
+   - file: book/topic01/assignment01_pandas_uci_adult.md
      title: Demo Assignment 1 Task
-   - file: book/topic01/assignment01_pandas_uci_adult_solution.ipynb
+   - file: book/topic01/assignment01_pandas_uci_adult_solution.md
      title: Demo Assignment 1 Solution
 
 - part: Topic 2
   chapters:
    - file: book/topic02/topic02_intro.md
      title: Topic 2 Intro
-   - file: book/topic02/topic2_visual_data_analysis.ipynb
+   - file: book/topic02/topic2_visual_data_analysis.md
      title: Visual Data Analysis
-   - file: book/topic02/topic2_additional_seaborn_matplotlib_plotly.ipynb
+   - file: book/topic02/topic2_additional_seaborn_matplotlib_plotly.md
      title: Seaborn, Matplotlib, Plotly
-   - file: book/topic02/assignment02_analyzing_cardiovascular_desease_data.ipynb
+   - file: book/topic02/assignment02_analyzing_cardiovascular_desease_data.md
      title: Demo Assignment 2 Task
-   - file: book/topic02/assignment02_analyzing_cardiovascular_desease_data_solution.ipynb
+   - file: book/topic02/assignment02_analyzing_cardiovascular_desease_data_solution.md
      title: Demo Assignment 2 Solution
 
 
